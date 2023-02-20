@@ -1,0 +1,133 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/jetbrainsmononl_bold.ttf",
+      "sha1": "1eed4197ff14f618aaf961e28420cb3ff18923ab"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_bolditalic.ttf",
+      "sha1": "e58decd85d6604abedb9911610f6253257303e5b"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_extrabold.ttf",
+      "sha1": "86cd72cc8821936c072e26a659ed14faea5721c3"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_extrabolditalic.ttf",
+      "sha1": "2ab7b142c96f5e3e22b6613d42ce3848b7750466"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_extralight.ttf",
+      "sha1": "a80c96cf86d9f94fc7119c27b620cdb990887d93"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_extralightitalic.ttf",
+      "sha1": "c4bc84f9225d3d81b5efb0f637e14407c277ae46"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_italic.ttf",
+      "sha1": "3e203443771e6ec832f8bedba91a67c7da68ac89"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_light.ttf",
+      "sha1": "56da1833eb772f293df05b63594835c78b66aa0b"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_lightitalic.ttf",
+      "sha1": "4bca444223545747b1fa28d7065ccd125712d475"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_medium.ttf",
+      "sha1": "49541c0eab4cf98823b6a94ce114516c0077373c"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_mediumitalic.ttf",
+      "sha1": "326ed1d22493edb3906dfbd0456dc4816fe396dd"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_regular.ttf",
+      "sha1": "8e57aca286df20304849c885af85c75a4b031ee2"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_semibold.ttf",
+      "sha1": "3070f346080f3be4ba790b2b267bfe1f23212550"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_semibolditalic.ttf",
+      "sha1": "c225e2355d08a9f9b72d07eb414635b4db9b39fb"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_thin.ttf",
+      "sha1": "26d54ccaa0a9ca5f7c22381df034d1c033fc3723"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmononl_thinitalic.ttf",
+      "sha1": "a04dacbcff34bc2aa0c9be8da221da63b2fcd325"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_bold.ttf",
+      "sha1": "8a0806a42bb8c44290735c17fbb439b8d8c08ec5"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_bolditalic.ttf",
+      "sha1": "7b9092d8adfb9cfb7c26acd02a9ec4a6158a4546"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_extrabold.ttf",
+      "sha1": "c414a0e9e1f3ad17e236bd60cc89badec7be29c4"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_extrabolditalic.ttf",
+      "sha1": "c32625140127a45ccc72967caf4b19a4a0a16465"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_extralight.ttf",
+      "sha1": "afb2c31cb893c82812f25051146f6b0a346cc0b9"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_extralightitalic.ttf",
+      "sha1": "9177f4139b4fc724f61aedf7a51ec453ba2d5561"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_italic.ttf",
+      "sha1": "936cdfc58bebc8b39e9aeaad3f2c92e9efc8aec4"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_light.ttf",
+      "sha1": "f2cb906a2416e6981bdf29932661b0e92600c8d4"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_lightitalic.ttf",
+      "sha1": "1050744c8c573c37bd52788376eba0887ddf86c7"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_medium.ttf",
+      "sha1": "5bf8fa15598c049508345993d774fae5e0722d42"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_mediumitalic.ttf",
+      "sha1": "00256d354e7f30fb3c0e14b468a6625990050a95"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_regular.ttf",
+      "sha1": "50fc729787e6133b511444b185c7397bd3ccd3da"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_semibold.ttf",
+      "sha1": "3660d46e706af24cf531ae2098c8bb4c14dc4847"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_semibolditalic.ttf",
+      "sha1": "87b2d362610011997b1dfa0d36c82e511f44493c"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_thin.ttf",
+      "sha1": "c11218d659dba5975eb681ffd17f4ed1ae784f63"
+    },
+    {
+      "path": "assets/fonts/jetbrainsmono_thinitalic.ttf",
+      "sha1": "5429f1fa539bfaf0e3e79586bed5b9864593a236"
+    }
+  ]
+}
