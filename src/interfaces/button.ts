@@ -16,14 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import React from "react";
 
-export type TButton = {
+
+export type ButtonProps = {
   onPress: () => void;
   text: string;
   className?: string;
+  icon?: React.ReactNode;
 };
 
-export type TTabButton = {
+export type TabButtonProps = {
   onPress: () => void;
   icon: React.ReactNode;
   active: boolean;

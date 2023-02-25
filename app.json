@@ -1,4 +1,5 @@
 {
   "name": "TRES",
-  "displayName": "TRES"
+  "displayName": "TRES",
+  "orientation": "portrait"
 }

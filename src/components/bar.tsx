@@ -69,8 +69,7 @@ export default function BottomBar({
         }
         console.log(state.index);
         return (
-          <TabButton onPress={onPress} icon={icon} active={isFocused} />
-          // <View className="text-[#0e0e0e]">{icon}</View>
+          <TabButton key={index} onPress={onPress} icon={icon} active={isFocused} />
         );
       })}
     </View>

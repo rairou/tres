@@ -19,9 +19,9 @@
 
 import React from 'react';
 import {Text, View, Pressable} from 'react-native';
-import {TButton, TTabButton} from '../interfaces/button';
+import {ButtonProps, TabButtonProps} from '../interfaces/button';
 
-export function TabButton({onPress, icon, active}: TTabButton) {
+export function TabButton({onPress, icon, active}: TabButtonProps) {
   return (
     <Pressable onPress={onPress}>
       {({pressed}) => (
@@ -49,7 +49,36 @@ export function TabButton({onPress, icon, active}: TTabButton) {
   );
 }
 
-export default function Button({onPress, text, className = ''}: TButton) {
+// Button designed for pin component. Do not use it as a normal button.
+export function PinButton({onPress, text, icon = null}: ButtonProps) {
+  return (
+    <Pressable onPress={onPress} className="mx-3 my-3">
+      {({pressed}) => (
+        <View className={`max-w-[60vw] bg-[#0e0e0e] rounded-xl`}>
+          <View
+            style={{
+              transform: [
+                {translateX: pressed ? 0 : -5},
+                {translateY: pressed ? 0 : -5},
+              ],
+            }}
+            className="flex max-w-[15vw] min-w-[15vw] min-h-[15vw] max-h-[15vw] items-center justify-center rounded-xl border-2 border-black bg-[#a78587] py-3 font-bold">
+            {icon ? icon :   
+            <Text
+              style={{fontFamily: 'JetBrains Mono', fontWeight: 'bold'}}
+              className="text-[#0e0e0e]">
+              {text}
+            </Text>
+            }
+          
+          </View>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+export default function Button({onPress, text, className = ''}: ButtonProps) {
   return (
     <Pressable onPress={onPress}>
       {({pressed}) => (

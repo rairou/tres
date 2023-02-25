@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+import React from "react";
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {SafeAreaView, View, Text, StatusBar} from 'react-native';
 import BottomBar from '../components/bar';
@@ -28,9 +28,15 @@ import HomeScreen from '../screens/home';
 import StatsScreen from '../screens/stats';
 import SettingsScreen from '../screens/settings';
 import {TabParamList} from '../interfaces/screen';
+import { useNavigation } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator<TabParamList>();
+
 export default function MainNavigator() {
+  const navigation = useNavigation();
+  React.useEffect(() => {
+    navigation.addListener('beforeRemove', (e) => e.preventDefault());
+  }, [navigation])
   return (
     <>
       <StatusBar backgroundColor="#F1EAD8" barStyle="default" />

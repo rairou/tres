@@ -19,18 +19,17 @@
 
 import {SafeAreaView, Text} from 'react-native';
 import Button from '../components/button';
+import Pin from '../components/pin';
 import {AuthScreenProps} from '../interfaces/screen';
 
 const AuthScreen: React.FC<AuthScreenProps> = props => {
   return (
-    <SafeAreaView className="flex-1 justify-center items-center">
+    <SafeAreaView className="flex-1 justify-center items-center bg-[#F1EAD8]">
       <Text className="text-[#0e0e0e]" style={{fontFamily: 'JetBrains Mono'}}>
-        Auth Screen
+        Enter the passcode for the database
       </Text>
-      <Button
-        onPress={() => props.navigation.navigate('Main')}
-        text="Connect"
-      />
+      <Pin pinSize={4} onSubmit={(pin: number[]) => props.navigation.navigate("Main")} />
+      
     </SafeAreaView>
   );
 };
