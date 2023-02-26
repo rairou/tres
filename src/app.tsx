@@ -20,8 +20,14 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import RootNavigator from './navs/root';
+import SplashScreen from 'react-native-splash-screen'
 
 const App = () => {
+
+  React.useEffect(() => {
+    SplashScreen.hide();
+  }, []);
+
   return (
     <NavigationContainer>
       <RootNavigator />
