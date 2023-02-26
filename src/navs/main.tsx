@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify

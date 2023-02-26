@@ -17,20 +17,12 @@
 */
 
 
-import {SafeAreaView, Text} from 'react-native';
-import Pin from '../components/pin';
-import {AuthScreenProps} from '../interfaces/screen';
+// This library is used to handle all fs-related functions
 
-const AuthScreen: React.FC<AuthScreenProps> = props => {
-  return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-[#F1EAD8]">
-      <Text className="text-[#0e0e0e]" style={{fontFamily: 'JetBrains Mono'}}>
-        Enter the passcode for the database
-      </Text>
-      <Pin pinSize={4} onSubmit={(pin: number[]) => props.navigation.navigate("Main")} />
-      
-    </SafeAreaView>
-  );
-};
+import { Dirs, FileSystem } from "react-native-file-access";
 
-export default AuthScreen;
+
+/// Get the database folder, create if not exist.
+export function getDbFolder() {
+
+}
