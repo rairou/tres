@@ -20,9 +20,20 @@
 // This library is used to handle all fs-related functions
 
 import { Dirs, FileSystem } from "react-native-file-access";
-
+import { Platform } from "react-native";
 
 /// Get the database folder, create if not exist.
 export function getDbFolder() {
+    let dbPath: string;
+    if (Platform.OS === "android") {
+        dbPath = Dirs.DatabaseDir + '/tres/';
+    } else {
+        dbPath = Dirs.DocumentDir + '/tres/db';
+    }
 
+    if (!FileSystem.exists(dbPath)) {
+        FileSystem.mkdir(dbPath)
+    }
+
+    return dbPath
 }

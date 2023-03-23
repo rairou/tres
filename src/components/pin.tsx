@@ -69,7 +69,7 @@ export default function Pin({ pinSize, onSubmit }: PinProps) {
     }
 
     return (
-        <View className='flex justify-center items-center max-w-[80vw]'>
+        <View className='flex justify-center items-center max-w-[85vw]'>
             <View className='flex-row py-5'>
                 {numberOfPins.map((value, index) => {
                     return (
