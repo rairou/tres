@@ -1,4 +1,4 @@
-﻿# TRES SAFE APP
+# TRES APP
 
 A react-native app for TRES device, an arduino based security device (Research paper is currently unavailable).
 
