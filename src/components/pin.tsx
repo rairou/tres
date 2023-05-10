@@ -84,7 +84,7 @@ export default function Pin({ pinSize, onSubmit }: PinProps) {
                     return (
                        (value === "backspace") ? <PinButton key={index} text={v} onPress={backspace} icon={<Icon.Delete className='text-[#0e0e0e] max-w-[16px]' />} /> : 
                             (value != null) ? <PinButton key={index} text={v} onPress={() => number(v)} />  : 
-                                <View key={index} className='px-8 bg-red-800'></View>
+                                <View key={index}></View>
                     )
                 })}
             </View>
