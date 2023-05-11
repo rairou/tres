@@ -31,9 +31,18 @@ export function getDbFolder() {
         dbPath = Dirs.DocumentDir + '/tres/db';
     }
 
-    if (!FileSystem.exists(dbPath)) {
-        FileSystem.mkdir(dbPath)
-    }
+
+    FileSystem.exists(dbPath).then((v) => {
+        if (!v) {
+            FileSystem.mkdir(dbPath).then((value) => {
+                console.log(`Created Directory: ${value}`);
+            })
+        }
+    })
 
     return dbPath
+}
+
+export function getDbPath() {
+    return `${getDbFolder()}debug-x`;
 }
