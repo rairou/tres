@@ -19,12 +19,20 @@
 
 import {createStackNavigator} from '@react-navigation/stack';
 import {DeviceStackParamList} from '../interfaces/screen';
+import RealtimeScreen from '../screens/device/realtime';
+import LoginScreen from '../screens/device/login';
+import DeviceScreen from '../screens/device/device';
 
 const DeviceStack = createStackNavigator<DeviceStackParamList>();
 export default function DeviceNavigator() {
   return (
-    <DeviceStack.Navigator>
-
+    <DeviceStack.Navigator 
+      screenOptions={{headerShown: false}}
+      initialRouteName="Login"
+    >
+      <DeviceStack.Screen name="Login" component={LoginScreen} />
+      <DeviceStack.Screen name="FindDevice" component={DeviceScreen} />
+      <DeviceStack.Screen name="Realtime" component={RealtimeScreen} />
     </DeviceStack.Navigator>
   );
 }
