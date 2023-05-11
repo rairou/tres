@@ -21,8 +21,10 @@ import React from 'react';
 import {SafeAreaView, View, Text, Image, Alert, StatusBar} from 'react-native';
 import Button from '../components/button';
 import {ConnectScreenProps} from '../interfaces/screen';
+import { useGlobalState } from '../state';
 
 const ConnectScreen: React.FC<ConnectScreenProps> = props => {
+  const [key, setKey] = useGlobalState("key");
   return (
     <SafeAreaView className="flex-1 bg-[#F1EAD8] justify-center">
       <StatusBar backgroundColor="#a78587" barStyle="default" />
@@ -47,14 +49,21 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
         <View className="flex-1 pt-4">
           <Button
             onPress={() => {
-              Alert.alert('TRES', 'Connect button pressed', [
-                {
-                  text: 'Cancel',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-                {text: 'OK', onPress: () => console.log('OK Pressed')},
-              ]);
+              // Alert.alert('TRES', 'Connect button pressed', [
+              //   {
+              //     text: 'Cancel',
+              //     onPress: () => console.log('Cancel Pressed'),
+              //     style: 'cancel',
+              //   },
+              //   {text: 'OK', onPress: () => console.log('OK Pressed')},
+              // ]);
+
+              if (!key) {
+                props.navigation.navigate('_Auth');
+              } else {
+
+              }
+
             }}
             text="CONNECT"
           />
