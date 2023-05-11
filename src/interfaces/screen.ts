@@ -36,9 +36,8 @@ export type AuthStackParamList = {
 };
 
 export type DeviceStackParamList = {
-  Device: undefined;
+  FindDevice: undefined;
   Login: undefined;
-  Register: undefined;
   Realtime: undefined;
 };
 
@@ -63,15 +62,12 @@ export type ConnectScreenProps = StackScreenProps<
 >;
 export type AuthScreenProps = StackScreenProps<AuthStackParamList, 'Auth'>;
 
-export type DeviceScreenProps = StackScreenProps<
+export type FindDeviceScreenProps = StackScreenProps<
   DeviceStackParamList,
-  'Device'
+  'FindDevice'
 >;
 export type LoginScreenProps = StackScreenProps<DeviceStackParamList, 'Login'>;
-export type RegisterScreenProps = StackScreenProps<
-  DeviceStackParamList,
-  'Register'
->;
+
 export type RealtimeScreenProps = StackScreenProps<
   DeviceStackParamList,
   'Realtime'
