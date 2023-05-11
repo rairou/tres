@@ -3,7 +3,7 @@
 A home repository for TRES (ˈtrās) device, an arduino based security device (Research paper is currently unavailable).
 
 #### NOTE:
-App is tested in android. If you want to compile yourself in ios, the icon and splash screen is not configured
+App is tested in android. If you want to compile yourself in ios, the icon and splash screen are not configured
 properly. PRs are open.
 
 ### Structure
