@@ -16,33 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-// This library is used to handle all fs-related functions
+GoogleSignin.configure({
+  webClientId: '', // insert your webclient id
+});
 
-import { Dirs, FileSystem } from "react-native-file-access";
-import { Platform } from "react-native";
-
-/// Get the database folder, create if not exist.
-export function getDbFolder() {
-    let dbPath: string;
-    if (Platform.OS === "android") {
-        dbPath = Dirs.DatabaseDir + '/tres/';
-    } else {
-        dbPath = Dirs.DocumentDir + '/tres/db';
-    }
-
-
-    FileSystem.exists(dbPath).then((v) => {
-        if (!v) {
-            FileSystem.mkdir(dbPath).then((value) => {
-                console.log(`Created Directory: ${value}`);
-            })
-        }
-    })
-
-    return dbPath
+export async function onGoogleButtonPress() {
+    const { idToken } = await GoogleSignin.signIn();
+    const googleCreds = auth.GoogleAuthProvider.credential(idToken);
+    return auth().signInWithCredential(googleCreds);
 }
 
-export function getDbPath() {
-    return `${getDbFolder()}debug-x`;
-}
+export  { GoogleSignin };

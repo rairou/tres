@@ -20,13 +20,37 @@
 import React from 'react';
 import {SafeAreaView, View, Text} from 'react-native';
 import { LoginScreenProps } from '../../interfaces/screen';
-
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { onGoogleButtonPress } from '../../lib/auth';
+import { useGlobalState } from '../../state';
+import Button from '../../components/button';
 
 const LoginScreen: React.FC<LoginScreenProps> = props => {
+  const [initializing, setInitializing] = React.useState(true);
+  const [user, setUser] = useGlobalState('user');
+  
+  const onAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  React.useEffect(() => {
+    
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber;
+  }, []);
+
+  if (user) {
+    props.navigation.navigate("FindDevice");
+  }
+
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-[#F1EAD8]">
       <Text className="text-[#0e0e0e]" style={{fontFamily: 'JetBrains Mono'}}>
         Login Screens
+        <Button onPress={() => onGoogleButtonPress().then(() => { 
+          console.log("Signed in with google") 
+        })} text='Login with Google'/>
       </Text>
     </SafeAreaView>
   );
