@@ -19,9 +19,12 @@
 #ifndef _SERVER_H
 #define _SERVER_H
 
+#include <BLEServer.h>
+
 #define SERVICE_UUID  "5e701e83-b88c-4622-888f-12fd72bb1837"
 #define MESSAGE_UUID  "c6f3bc87-c04e-4b7c-a846-6f3e87213b61"
 #define BOX_UUID      "2bdada9f-2a73-4faf-8745-21b0375fb934"
+
 
 class TresBLE {
     public:
@@ -30,11 +33,22 @@ class TresBLE {
         char* box_uuid;
 
         TresBLE();
-        TresBLE(char* _service_uuid, char* _message_uuid, char* _box_uuid);
-        
+        void init();
+        void start();
 
     private:
+        BLEServer *server;
+        BLEService *service;
         
+};
+
+class CharacteristicsCallbacks : public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *_char);
+
+};
+class ServerCallbacks : public BLEServerCallbacks {
+    void onConnect(BLEServer *pServer);
+    void onDisconnect(BLEServer *pServer);
 };
 
 #endif

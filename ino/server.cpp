@@ -18,20 +18,75 @@
 
 #include "server.h"
 #include <Arduino.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
 
-TresBLE::TresBLE(
-    char* _service_uuid,
-    char* _message_uuid, 
-    char* _box_uuid
-) {
-    service_uuid = _service_uuid;
-    message_uuid = _message_uuid;
-    box_uuid = _box_uuid;
-}
+BLECharacteristic *message_characteristic;
+BLECharacteristic *box_characteristic;
 
 // default constructor
 TresBLE::TresBLE() {
     service_uuid = SERVICE_UUID;
     message_uuid = MESSAGE_UUID;
     box_uuid = BOX_UUID;
+    
+}
+
+void TresBLE::init() {
+    
+    BLEDevice::init("TRES");
+    server = BLEDevice::createServer();
+    server->setCallbacks(new ServerCallbacks());
+
+    service = server->createService(service_uuid);
+    delay(100);
+
+    message_characteristic = service->createCharacteristic(
+        message_uuid,
+        BLECharacteristic::PROPERTY_READ |
+          BLECharacteristic::PROPERTY_WRITE |
+          BLECharacteristic::PROPERTY_NOTIFY |
+          BLECharacteristic::PROPERTY_INDICATE
+    );
+    
+     box_characteristic = service->createCharacteristic(
+        box_uuid,
+        BLECharacteristic::PROPERTY_READ |
+          BLECharacteristic::PROPERTY_WRITE |
+          BLECharacteristic::PROPERTY_NOTIFY |
+          BLECharacteristic::PROPERTY_INDICATE
+    );
+
+    Serial.println("Device initialized");
+    
+}
+
+void TresBLE::start(){
+    service->start();
+    server->getAdvertising()->start();
+    message_characteristic->setValue("Hello World");
+    message_characteristic->setCallbacks(new CharacteristicsCallbacks());
+
+    box_characteristic->setValue("none");
+    box_characteristic->setCallbacks(new CharacteristicsCallbacks());
+
+    Serial.println("Listening for connections...");
+}
+
+void ServerCallbacks::onConnect(BLEServer *pServer) {
+    Serial.println("Connected");
+}
+
+void ServerCallbacks::onDisconnect(BLEServer *pServer) {
+    Serial.println("Disconnected");
+}
+
+void CharacteristicsCallbacks::onWrite(BLECharacteristic *pChar) {
+    Serial.print("New Value: ");
+    Serial.println(pChar->getValue().c_str());
+    
+    if (pChar == box_characteristic) {
+        Serial.println("BOX");
+    }
 }

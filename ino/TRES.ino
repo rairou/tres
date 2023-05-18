@@ -20,6 +20,8 @@ bool state = false;
 void setup() {
   Serial.begin(9600);
   setupPins();
+  server.init();
+  server.start();
 }
 
 
