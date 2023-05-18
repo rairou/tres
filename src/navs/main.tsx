@@ -39,7 +39,7 @@ export default function MainNavigator() {
   }, [navigation])
   return (
     <>
-      <StatusBar backgroundColor="#F1EAD8" barStyle="default" />
+      <StatusBar backgroundColor="#F1EAD8" barStyle="dark-content" />
       <Tab.Navigator
         tabBar={props => <BottomBar {...props} />}
         screenOptions={{headerShown: false}}

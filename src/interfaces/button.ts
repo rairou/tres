@@ -19,11 +19,22 @@
 import React from "react";
 
 
+export interface ButtonPadding {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
+
 export type ButtonProps = {
   onPress: () => void;
   text: string;
-  className?: string;
+  klass?: string;
   icon?: React.ReactNode;
+  disabled?: boolean;
+  padding?: ButtonPadding;
+  background?: string;
+  shadow?: boolean
 };
 
 export type TabButtonProps = {

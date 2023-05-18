@@ -18,40 +18,103 @@
 
 
 import React from 'react';
-import {SafeAreaView, View, Text} from 'react-native';
+import {SafeAreaView, View, Text, Pressable, Alert} from 'react-native';
 import { LoginScreenProps } from '../../interfaces/screen';
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth,  { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { onGoogleButtonPress } from '../../lib/auth';
 import { useGlobalState } from '../../state';
 import Button from '../../components/button';
+import Google from '../../components/google';
+import Input from '../../components/input';
+import Loading from '../../components/loading';
+import ErrorDialog from '../../components/dialog';
+
 
 const LoginScreen: React.FC<LoginScreenProps> = props => {
-  const [initializing, setInitializing] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [user, setUser] = useGlobalState('user');
-  
+
   const onAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
     setUser(user);
-    if (initializing) setInitializing(false);
+    if (!user) {
+      props.navigation.navigate("Login");
+    } else {
+      props.navigation.navigate("FindDevice");
+    }
+    if (loading) setLoading(false);
   }
 
   React.useEffect(() => {
-    
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber;
   }, []);
 
-  if (user) {
-    props.navigation.navigate("FindDevice");
+
+  // if (user) {
+  //   props.navigation.navigate("FindDevice");
+  // }
+
+  const validateEmail = (text: string): boolean => {
+    console.log(text);
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    if (reg.test(text) === false) {
+      return false;
+    }
+    else {
+      return true
+    }
+  }
+  
+  const login = () => {
+    setLoading(true);
+          auth().signInWithEmailAndPassword(email, password).then(() => {
+            // props.navigation.navigate('FindDevice');
+          }).catch((e: FirebaseAuthTypes.NativeFirebaseAuthError) => {
+            // idk if it is necessary to store the error message as state or store it as local variable
+            setLoading(false);
+            let error = e.message;
+            
+            <ErrorDialog title="Login Error" message={`${e.code} : ${error}`} />
+          
+          })
   }
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-[#F1EAD8]">
-      <Text className="text-[#0e0e0e]" style={{fontFamily: 'JetBrains Mono'}}>
-        Login Screens
-        <Button onPress={() => onGoogleButtonPress().then(() => { 
-          console.log("Signed in with google") 
-        })} text='Login with Google'/>
-      </Text>
+    <SafeAreaView className="flex-1 items-center justify-center bg-[#F1EAD8]">
+      
+      <View>
+        <Loading title='Logging in...' visible={loading} />
+      <Text className='font-bold py-5 text-[30px] text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>Login</Text>
+ 
+      <Button  onPress={() => {
+        onGoogleButtonPress().then((value) => {
+          props.navigation.navigate("FindDevice");
+
+        }).catch((e) => {
+          console.log(`Error signing in using google: ${e}`);
+        });
+      }} text='Login with Google' icon={<Google />} />
+
+  
+        <Input onChangeText={(v) => setEmail(v)} klass="pt-10" placeholder="Enter your email" />
+        <Input onChangeText={(v) => setPassword(v)} klass="pb-5" placeholder="Enter your password" password />
+
+        <Button onPress={() => {
+
+          if (email && password && validateEmail(email)) {
+            login()
+          } else {
+            Alert.alert("Login Error", "Please provide proper email or password");
+          }
+        }} text='Login' />
+
+        <Pressable onPress={() => props.navigation.navigate("Register")}>
+            <Text className="text-[#0e0e0e] pt-5 underline" style={{ fontFamily: 'JetBrains Mono' }}>Register here &rarr;</Text>
+        </Pressable>
+        </View>
+
     </SafeAreaView>
   );
 }

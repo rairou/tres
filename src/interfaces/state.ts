@@ -16,27 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface TresDoc {
-    lat: number;
-    long: number;
-    timestamp: string;
+import { Device } from "react-native-ble-plx";
+import { TransactionData } from "./data";
+
+export interface Connection {
+    ble: boolean;
+    device?: Device | null;
+    error?: string;
 }
 
-export interface TresCol {
-    version: string;
-    data: string;
-    last_updated: string;
-    _iv: string;
-}
-
-export interface Location {
-    lat: number;
-    long: number;
-}
-
-export interface TransactionData {
-    type: 'location' | 'raw' | 'notif';
-    message: string;
-    data?: Location | {};
-    timestamp: number;
+export interface Value {
+    box?: TransactionData | null;
+    message?: TransactionData | null;
 }

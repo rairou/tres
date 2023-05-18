@@ -16,27 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface TresDoc {
-    lat: number;
-    long: number;
-    timestamp: string;
-}
+#ifndef _SERVER_H
+#define _SERVER_H
 
-export interface TresCol {
-    version: string;
-    data: string;
-    last_updated: string;
-    _iv: string;
-}
+#define SERVICE_UUID  "5e701e83-b88c-4622-888f-12fd72bb1837"
+#define MESSAGE_UUID  "c6f3bc87-c04e-4b7c-a846-6f3e87213b61"
+#define BOX_UUID      "2bdada9f-2a73-4faf-8745-21b0375fb934"
 
-export interface Location {
-    lat: number;
-    long: number;
-}
+class TresBLE {
+    public:
+        char* service_uuid;
+        char* message_uuid;
+        char* box_uuid;
 
-export interface TransactionData {
-    type: 'location' | 'raw' | 'notif';
-    message: string;
-    data?: Location | {};
-    timestamp: number;
-}
+        TresBLE();
+        TresBLE(char* _service_uuid, char* _message_uuid, char* _box_uuid);
+        
+
+    private:
+        
+};
+
+#endif

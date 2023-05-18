@@ -16,27 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface TresDoc {
-    lat: number;
-    long: number;
-    timestamp: string;
+import base64 from "react-native-base64";
+
+export const sleep = (time: number): Promise<void> => 
+    new Promise((resolve) => setTimeout(() => resolve(), time));
+
+
+export const encode = (s: string | null): string => {
+    if (!s) return "";
+    return base64.encode(s);
 }
 
-export interface TresCol {
-    version: string;
-    data: string;
-    last_updated: string;
-    _iv: string;
+export const decode = (s: string | null) : string => {
+    if (!s) return "";
+    return base64.decode(s);
 }
 
-export interface Location {
-    lat: number;
-    long: number;
-}
-
-export interface TransactionData {
-    type: 'location' | 'raw' | 'notif';
-    message: string;
-    data?: Location | {};
-    timestamp: number;
-}

@@ -27,16 +27,17 @@ import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 
 export type RootStackParamList = {
   Connect: undefined;
-  _Auth: undefined;
+  _Auth: { connect: boolean };
 };
 
 export type AuthStackParamList = {
-  Auth: undefined;
+  Auth: { connect: boolean };
   Main: undefined;
 };
 
 export type DeviceStackParamList = {
   FindDevice: undefined;
+  Register: undefined;
   Login: undefined;
   Realtime: undefined;
 };
@@ -66,6 +67,12 @@ export type FindDeviceScreenProps = StackScreenProps<
   DeviceStackParamList,
   'FindDevice'
 >;
+
+export type RegisterScreenProps = StackScreenProps<
+  DeviceStackParamList,
+  'Register'
+>;
+
 export type LoginScreenProps = StackScreenProps<DeviceStackParamList, 'Login'>;
 
 export type RealtimeScreenProps = StackScreenProps<

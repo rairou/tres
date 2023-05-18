@@ -30,7 +30,7 @@ export default function BottomBar({
   navigation,
 }: BottomTabBarProps) {
   return (
-    <View className="flex-1 flex-row bg-[#F1EAD8] justify-center min-w-[100vw] max-h-[9.5vh] border-t-2">
+    <View className="flex-1 flex-row bg-[#F1EAD8] justify-center min-w-[100vw] max-h-[9.5vh] border-t-[1.5px]">
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
         console.log(route.name);
@@ -55,16 +55,16 @@ export default function BottomBar({
         let icon;
         switch (route.name) {
           case 'Home':
-            icon = <Icon.Home className="text-[#0e0e0e] max-h-[18px]" />;
+            icon = <Icon.Home className={` ${isFocused ? 'text-[#0e0e0e]' : 'text-[#886d6f]'}  max-h-[18px]`} />;
             break;
           case 'Stats':
-            icon = <Icon.BarChart className="text-[#0e0e0e] max-h-[18px]" />;
+            icon = <Icon.BarChart className={` ${isFocused ? 'text-[#0e0e0e]' : 'text-[#886d6f]'}  max-h-[18px]`} />;
             break;
           case 'Device':
-            icon = <Icon.MapPin className="text-[#0e0e0e] max-h-[18px]" />;
+            icon = <Icon.MapPin className={` ${isFocused ? 'text-[#0e0e0e]' : 'text-[#886d6f]'}  max-h-[18px]`} />;
             break;
           case 'Settings':
-            icon = <Icon.Settings className="text-[#0e0e0e] max-h-[18px]" />;
+            icon = <Icon.Settings className={` ${isFocused ? 'text-[#0e0e0e]' : 'text-[#886d6f]'}  max-h-[18px]`} />;
             break;
         }
         console.log(state.index);

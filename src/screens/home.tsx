@@ -21,8 +21,41 @@ import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {SafeAreaView, View, Text} from 'react-native';
 import {HomeScreenProps} from '../interfaces/screen';
+import { LOCATION, useGlobalState } from '../state';
+import { location_permission } from "../lib/perm";
+import { sleep } from "../lib/utils";
+import { BackgroundService, start, stop } from '../lib/task';
+import Geolocation from '@react-native-community/geolocation';
+import Button from '../components/button';
+import { ble } from '../lib/ble';
+import { Device } from 'react-native-ble-plx';
+
+
+interface TaskData {
+    delay: number;
+}
+
 
 const HomeScreen: React.FC<HomeScreenProps> = props => {
+  const [loc, setLoc] = useGlobalState('loc');
+  const [val, setVal] = useGlobalState('value');
+  const [devices, setDevices] = React.useState<Device[]>([]);
+
+  let running = BackgroundService.isRunning();
+
+  const scan = () => {
+    ble.startDeviceScan(null, null, (error, device) => {
+      if (device) {
+        setDevices([...devices, device])
+      }
+    })
+  }
+  
+  React.useEffect(() => {
+      location_permission();
+      
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 px-5 pt-12 bg-[#F1EAD8]">
       <View className="">
@@ -37,6 +70,16 @@ const HomeScreen: React.FC<HomeScreenProps> = props => {
             2{' '}
           </Text>
           places TODAY!
+        </Text>
+        <Button onPress={scan} text='Scan' padding={{ top: 2 }} />
+        <Button onPress={async () => {
+          if (running) await stop();
+        }}  text="Stop" />
+        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
+          Lat: {loc?.lat}; Long: {loc?.long}
+        </Text>
+        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
+          Type: ${val.message?.type} Message: {val.message?.message} 
         </Text>
       </View>
     </SafeAreaView>

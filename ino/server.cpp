@@ -16,27 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface TresDoc {
-    lat: number;
-    long: number;
-    timestamp: string;
+#include "server.h"
+#include <Arduino.h>
+
+TresBLE::TresBLE(
+    char* _service_uuid,
+    char* _message_uuid, 
+    char* _box_uuid
+) {
+    service_uuid = _service_uuid;
+    message_uuid = _message_uuid;
+    box_uuid = _box_uuid;
 }
 
-export interface TresCol {
-    version: string;
-    data: string;
-    last_updated: string;
-    _iv: string;
-}
-
-export interface Location {
-    lat: number;
-    long: number;
-}
-
-export interface TransactionData {
-    type: 'location' | 'raw' | 'notif';
-    message: string;
-    data?: Location | {};
-    timestamp: number;
+// default constructor
+TresBLE::TresBLE() {
+    service_uuid = SERVICE_UUID;
+    message_uuid = MESSAGE_UUID;
+    box_uuid = BOX_UUID;
 }

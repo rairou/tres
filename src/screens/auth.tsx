@@ -25,18 +25,31 @@ import { useGlobalState } from '../state';
 import { deriveKeyFromPin } from '../lib/key';
 import { checkEncryptionKey, tresdb } from '../lib/db';
 import { getDbPath } from '../lib/path';
+import Loading from "../components/loading";
+
 
 const AuthScreen: React.FC<AuthScreenProps> = props => {
   const [_key, setKey] = useGlobalState("key");
   const [_iv, setIv] = useGlobalState("iv");
   const [exist, setExist] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const { connect } = props.route.params;
+
   React.useEffect(() => {
+
     FileSystem.exists(getDbPath()).then(v => {
       v ? setExist(true) : setExist(false);
     })
+
+
   }, []);
+
+  
+
+  
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-[#F1EAD8]">
+      <Loading visible={loading} title="Loading..." />
       {exist ? <></> : 
         <Text className='text-[#a785a7]' style={{fontFamily: 'JetBrains Mono'}}>
           NOTE: You can only set key ONCE</Text> }
@@ -49,9 +62,11 @@ const AuthScreen: React.FC<AuthScreenProps> = props => {
         db.getIv().then((v) => {
           setIv(v);
         })
-
+        
+        setLoading(true)
         checkEncryptionKey(getDbPath(), k)
           .then(v => {
+            setLoading(false)
             const b = () => {
               props.navigation.navigate("Main")
               setKey(k);

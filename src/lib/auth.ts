@@ -20,12 +20,12 @@ import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
-  webClientId: '50960082294-0bdd1qioaoji5knbvv5im1gr1r1tcsqd.apps.googleusercontent.com', // insert your webclient id
+  webClientId: '1080017919379-88rdotmijnq22huanthknkjh0qg7dblr.apps.googleusercontent.com', // insert your webclient id
   
 });
 
 export async function onGoogleButtonPress() {
-    await GoogleSignin.hasPlayServices();
+  await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const { idToken } = await GoogleSignin.signIn();
     const googleCreds = auth.GoogleAuthProvider.credential(idToken);
     return auth().signInWithCredential(googleCreds);
