@@ -11,7 +11,7 @@ properly. PRs are open.
 | Code | Description |
 |--|--|
 | [/](https://github.com/riyuzenn/tres/tree/master/) | React native app |
-| [ino](https://github.com/riyuzenn/tres/tree/master/arduino) | Arduino code (including circuit diagram) |
+| [ino](https://github.com/riyuzenn/tres/tree/master/ino) | Arduino code (including circuit diagram) |
 | [docs](https://github.com/riyuzenn/tres/tree/master/docs) | Documentation & notes |
 
 
