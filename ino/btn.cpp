@@ -80,7 +80,6 @@ void button::update()
 			break;
 			
 		case CLICKED:
-			Serial.println("Clicked");
 		case DOUBLE_CLICKED:
 			state_ = ACTIVE;
 			break;
