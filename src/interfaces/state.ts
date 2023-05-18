@@ -26,6 +26,6 @@ export interface Connection {
 }
 
 export interface Value {
-    box?: TransactionData | null;
-    message?: TransactionData | null;
+    box?: string | null;
+    message?: string | null;
 }

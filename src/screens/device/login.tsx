@@ -22,7 +22,7 @@ import {SafeAreaView, View, Text, Pressable, Alert} from 'react-native';
 import { LoginScreenProps } from '../../interfaces/screen';
 import auth,  { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { onGoogleButtonPress } from '../../lib/auth';
-import { useGlobalState } from '../../state';
+import { useGlobalState } from '../../lib/state';
 import Button from '../../components/button';
 import Google from '../../components/google';
 import Input from '../../components/input';

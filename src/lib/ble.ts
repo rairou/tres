@@ -63,12 +63,12 @@ export function parse<T>(value: string) : T {
     return JSON.parse(decode(value)) as T
 }
 
-export async function sendLocationData(id: DeviceId, data: Location) : Promise<Characteristic> {
+export async function sendLocationData(id: DeviceId, data: string) : Promise<Characteristic> {
     return ble.writeCharacteristicWithoutResponseForDevice(
         id,
         SERVICE_UUID,
         BOX_UUID,
-        encode(JSON.stringify(data)),
+        encode(data),
     )
 }
 

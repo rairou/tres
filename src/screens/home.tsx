@@ -21,7 +21,7 @@ import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {SafeAreaView, View, Text} from 'react-native';
 import {HomeScreenProps} from '../interfaces/screen';
-import { LOCATION, useGlobalState } from '../state';
+import { LOCATION, useGlobalState } from '../lib/state';
 import { location_permission } from "../lib/perm";
 import { sleep } from "../lib/utils";
 import { BackgroundService, start, stop } from '../lib/task';
@@ -78,9 +78,16 @@ const HomeScreen: React.FC<HomeScreenProps> = props => {
         <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
           Lat: {loc?.lat}; Long: {loc?.long}
         </Text>
-        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
-          Type: ${val.message?.type} Message: {val.message?.message} 
+        {devices.map((v, i) => {
+          return (<Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
+          Device: {v.name};{v.id}
         </Text>
+          )
+        })}
+        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
+          Type: ${val.message} Message: {val.message}
+        </Text>
+        
       </View>
     </SafeAreaView>
   );

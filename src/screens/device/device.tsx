@@ -20,7 +20,7 @@
 import React from 'react';
 import {SafeAreaView, View, Text, Switch, Pressable} from 'react-native';
 import { FindDeviceScreenProps } from '../../interfaces/screen';
-import { useGlobalState } from '../../state';
+import { useGlobalState } from '../../lib/state';
 import Button from '../../components/button';
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useNavigation } from '@react-navigation/native';

@@ -23,7 +23,7 @@ import RealtimeScreen from '../screens/device/realtime';
 import LoginScreen from '../screens/device/login';
 import DeviceScreen from '../screens/device/device';
 import RegisterScreen from '../screens/device/register';
-import { useGlobalState } from '../state';
+import { useGlobalState } from '../lib/state';
 import Loading from '../components/loading';
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';

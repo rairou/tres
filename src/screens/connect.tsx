@@ -22,14 +22,15 @@ import {SafeAreaView, View, Text, Image, Alert, StatusBar, Modal, Pressable, Log
 import Button from '../components/button';
 import {ConnectScreenProps} from '../interfaces/screen';
 import { Location, TransactionData } from '../interfaces/data';
-import { useGlobalState } from '../state';
+import { useGlobalState } from '../lib/state';
 import Loading from '../components/loading';
 import { BackgroundService, start, stop, Geolocation } from '../lib/task';
 import { decode, sleep } from "../lib/utils";
-import { BLE_CONF, ble, scanDevice } from "../lib/ble";
+import { BLE_CONF, ble, scanDevice, sendLocationData } from "../lib/ble";
 import { Device } from 'react-native-ble-plx';
 import { bluetooth_permission, location_permission } from '../lib/perm';
 import { PERMISSIONS, check } from 'react-native-permissions';
+import { GeolocationResponse } from '@react-native-community/geolocation';
 
 // LogBox.ignoreLogs(["new NativeEventEmitter"])
 LogBox.ignoreAllLogs();
@@ -122,7 +123,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
                 device
                     .readCharacteristicForService(BLE_CONF.service, BLE_CONF.message)
                     .then(v => {
-                        let val = JSON.parse(decode(v?.value)) as TransactionData;
+                        let val = JSON.parse(decode(v?.value));
                         setValue({
                           message: val,
                         })
@@ -131,7 +132,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
                 device
                     .readCharacteristicForService(BLE_CONF.service, BLE_CONF.box)
                     .then(v => {
-                      let val = JSON.parse(decode(v?.value)) as TransactionData;
+                      let val = JSON.parse(decode(v?.value));
                       setValue({
                         box: val
                       })
@@ -142,7 +143,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
                     BLE_CONF.message, 
                     (error, char) => {
                         if (!char) return
-                        let val = JSON.parse(decode(char?.value)) as TransactionData;
+                        let val = JSON.parse(decode(char?.value));
                         setValue({
                           message: val
                         })
@@ -156,7 +157,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
                     BLE_CONF.box, 
                     (error, char) => {
                         if (!char) return
-                        let val = JSON.parse(decode(char?.value)) as TransactionData;
+                        let val = JSON.parse(decode(char?.value));
                         setValue({
                           box: val
                         })
@@ -178,7 +179,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
     const isConnected = await device.isConnected();
     if (isConnected) {
         ble.cancelTransaction('messagetransaction');
-        ble.cancelTransaction('nightmodetransaction');
+        ble.cancelTransaction('boxtransaction');
         ble.cancelDeviceConnection(device.id)
             .then(() => {
                 console.log('Disconnected');
@@ -207,6 +208,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
       
           }
         });
+
         // await sleep(3000);
         setShowConnecting(true);
         if (!conn.device) {
@@ -221,8 +223,9 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
           setShowConnecting(false);
         }
         
+       
   
-        Geolocation.getCurrentPosition(async (pos) => {
+        const posHandler = async (pos: GeolocationResponse) => {
           let c = pos.coords;
 
           setLoc({
@@ -231,12 +234,16 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
           })
   
           if (BackgroundService.isRunning()) {
-            await BackgroundService.updateNotification({
-                taskDesc: `Latitude: ${c.latitude}; Longitude: ${c.longitude}`
-            });
+            // await BackgroundService.updateNotification({
+            //     // taskDesc: `Latitude: ${c.latitude}; Longitude: ${c.longitude}`
+            // });
           }
-        })
-  
+        }
+        Geolocation.getCurrentPosition(posHandler);
+
+        if (value.box?.startsWith('location') && conn.device) {
+          sendLocationData(conn.device?.id, `loc|${loc?.lat}|${loc?.long}`);
+        }
         
         await sleep(delay)
         
@@ -328,6 +335,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
               
       
               } else {
+                await disconnectDevice();
                 await stop();
               } 
               // ble.stopDeviceScan();
@@ -353,6 +361,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
           />
           <Text className='text-[#0e0e0e]'>Dc: {dc}</Text>
           <Text className='text-[#0e0e0e]'>Device: {conn.device?.name}</Text>
+          <Text className='text-[#0e0e0e]'>Message: {value.message}</Text>
           <View className="min-h-10 bg-[#0e0e0e]"></View>
         </View>
       </View>

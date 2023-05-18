@@ -21,7 +21,7 @@ import { FileSystem } from "react-native-file-access";
 import {SafeAreaView, Text, Alert } from 'react-native';
 import Pin from '../components/pin';
 import {AuthScreenProps} from '../interfaces/screen';
-import { useGlobalState } from '../state';
+import { useGlobalState } from '../lib/state';
 import { deriveKeyFromPin } from '../lib/key';
 import { checkEncryptionKey, tresdb } from '../lib/db';
 import { getDbPath } from '../lib/path';

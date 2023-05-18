@@ -23,7 +23,7 @@ import { RegisterScreenProps } from '../../interfaces/screen';
 import Input from '../../components/input';
 import Button from '../../components/button';
 import Google from '../../components/google';
-import { useGlobalState } from '../../state';
+import { useGlobalState } from '../../lib/state';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import Loading from '../../components/loading';
 import { onGoogleButtonPress } from '../../lib/auth';

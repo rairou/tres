@@ -30,8 +30,8 @@ export interface TresCol {
 }
 
 export interface Location {
-    lat: number;
-    long: number;
+    lat: number | null;
+    long: number | null;
 }
 
 export interface TransactionData {
