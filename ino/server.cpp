@@ -65,13 +65,23 @@ void TresBLE::init() {
 void TresBLE::start(){
     service->start();
     server->getAdvertising()->start();
-    message_characteristic->setValue("Hello World");
+    message_characteristic->setValue("TRES");
     message_characteristic->setCallbacks(new CharacteristicsCallbacks());
 
     box_characteristic->setValue("none");
     box_characteristic->setCallbacks(new CharacteristicsCallbacks());
 
     Serial.println("Listening for connections...");
+}
+
+void TresBLE::sendLocNotif() {
+  message_characteristic->setValue("location");
+  message_characteristic->notify();
+}
+
+void TresBLE::clearMessage() {
+  message_characteristic->setValue("TRES");
+  message_characteristic->notify();
 }
 
 void ServerCallbacks::onConnect(BLEServer *pServer) {

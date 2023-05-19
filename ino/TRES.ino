@@ -30,7 +30,10 @@ void loop() {
 
   if (btn.isPressed(3)) {
     Serial.println("SOS");
+    state = !state;
     digitalWrite(LED_PIN, !state);
+    server.sendLocNotif();
+    server.clearMessage();
   }
 
 }

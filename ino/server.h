@@ -35,6 +35,8 @@ class TresBLE {
         TresBLE();
         void init();
         void start();
+        void sendLocNotif();
+        void clearMessage();
 
     private:
         BLEServer *server;

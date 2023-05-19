@@ -19,7 +19,7 @@
 
 import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import {SafeAreaView, View, Text} from 'react-native';
+import {SafeAreaView, View, Text, LogBox} from 'react-native';
 import {HomeScreenProps} from '../interfaces/screen';
 import { LOCATION, useGlobalState } from '../lib/state';
 import { location_permission } from "../lib/perm";
@@ -30,6 +30,8 @@ import Button from '../components/button';
 import { ble } from '../lib/ble';
 import { Device } from 'react-native-ble-plx';
 
+LogBox.ignoreLogs(["new NativeEmitter"])
+LogBox.ignoreAllLogs();
 
 interface TaskData {
     delay: number;
@@ -44,10 +46,13 @@ const HomeScreen: React.FC<HomeScreenProps> = props => {
   let running = BackgroundService.isRunning();
 
   const scan = () => {
-    ble.startDeviceScan(null, null, (error, device) => {
-      if (device) {
-        setDevices([...devices, device])
-      }
+    // ble.startDeviceScan(null, null, (error, device) => {
+    //   if (device && device.name == "TRES") {
+    //     setDevices([...devices, device])
+    //   }
+    // })
+    ble.connectToDevice("B8:D6:1A:41:D8:CE").then((device) => {
+      setDevices([...devices, device])
     })
   }
   
@@ -77,6 +82,9 @@ const HomeScreen: React.FC<HomeScreenProps> = props => {
         }}  text="Stop" />
         <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
           Lat: {loc?.lat}; Long: {loc?.long}
+        </Text>
+        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
+          Device goes here
         </Text>
         {devices.map((v, i) => {
           return (<Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>

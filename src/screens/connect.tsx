@@ -24,7 +24,7 @@ import {ConnectScreenProps} from '../interfaces/screen';
 import { Location, TransactionData } from '../interfaces/data';
 import { useGlobalState } from '../lib/state';
 import Loading from '../components/loading';
-import { BackgroundService, start, stop, Geolocation } from '../lib/task';
+import { BackgroundService, start, stop, Geolocation, isRunning } from '../lib/task';
 import { decode, sleep } from "../lib/utils";
 import { BLE_CONF, ble, scanDevice, sendLocationData } from "../lib/ble";
 import { Device } from 'react-native-ble-plx';
@@ -120,51 +120,6 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
                     })
                     setDc(true);
                 });
-                device
-                    .readCharacteristicForService(BLE_CONF.service, BLE_CONF.message)
-                    .then(v => {
-                        let val = JSON.parse(decode(v?.value));
-                        setValue({
-                          message: val,
-                        })
-                    });
-
-                device
-                    .readCharacteristicForService(BLE_CONF.service, BLE_CONF.box)
-                    .then(v => {
-                      let val = JSON.parse(decode(v?.value));
-                      setValue({
-                        box: val
-                      })
-                    });
-                
-                device.monitorCharacteristicForService(
-                    BLE_CONF.service, 
-                    BLE_CONF.message, 
-                    (error, char) => {
-                        if (!char) return
-                        let val = JSON.parse(decode(char?.value));
-                        setValue({
-                          message: val
-                        })
-                        
-                    },
-                    "messagetransaction"
-                );
-                
-                device.monitorCharacteristicForService(
-                    BLE_CONF.service, 
-                    BLE_CONF.box, 
-                    (error, char) => {
-                        if (!char) return
-                        let val = JSON.parse(decode(char?.value));
-                        setValue({
-                          box: val
-                        })
-                    },
-                    "boxtransaction"
-                );
-
                 console.log("Connection established");
 
             });
@@ -198,33 +153,6 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
       console.log(`Background task status: ${BackgroundService.isRunning()} with delay ${delay}`);
       for (let i = 0; BackgroundService.isRunning(); i++) {
 
-        
-        
-        // await connectDevice();
-        ble.startDeviceScan(null, null, (error, scannedDevice) => {
-          if (scannedDevice && scannedDevice.name === BLE_CONF.name) {
-            ble.stopDeviceScan();
-            connectDevice(scannedDevice);
-      
-          }
-        });
-
-        // await sleep(3000);
-        setShowConnecting(true);
-        if (!conn.device) {
-          console.log('No device found inside');
-          setShowConnecting(false)
-          setConn({
-            ble: false,
-            error: 'No device found'
-          })
-          // stop();
-        } else {
-          setShowConnecting(false);
-        }
-        
-       
-  
         const posHandler = async (pos: GeolocationResponse) => {
           let c = pos.coords;
 
@@ -239,11 +167,131 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
             // });
           }
         }
+
         Geolocation.getCurrentPosition(posHandler);
 
-        if (value.box?.startsWith('location') && conn.device) {
+        if (!conn.device) {
+          ble.startDeviceScan(null, null, (error, device) => {
+            if (device && device.name == BLE_CONF.name) {
+              ble.stopDeviceScan();
+              setConn({
+                ble: false,
+                device: device
+              })
+              connectionHandler(device);
+            }
+          })
+        } 
+
+        const connectionHandler = (device: Device) => {
+          if (!conn.ble) {
+            device
+              .connect()
+              .then(d => {
+                setConn({
+                  ble: true,
+                  device: device
+                })
+                return device.discoverAllServicesAndCharacteristics();
+              })
+              .then(d => {
+                d.readCharacteristicForService(BLE_CONF.service, BLE_CONF.message)
+                  .then(v => {
+                    setValue({
+                      message: decode(v.value)
+                    })
+                  })
+              })
+          }
+        }
+
+        if (conn.device) {
+          conn.device
+            .connect()
+            .then(device => {
+              setConn({
+                device: device,
+                ble: true
+              })
+            })
+        }
+
+        
+        if (value.message?.startsWith('location') && conn.device) {
           sendLocationData(conn.device?.id, `loc|${loc?.lat}|${loc?.long}`);
         }
+    
+        // // await connectDevice();
+        // if (!conn.device) {
+        //   ble.startDeviceScan(null, null, (error, scannedDevice) => {
+        //     if (scannedDevice && scannedDevice.name === BLE_CONF.name) {
+        //       ble.stopDeviceScan();
+        //       connectDevice(scannedDevice);
+        //     }
+        //   });
+        //   await sleep(3000);
+        //   setConn({
+        //     ble: false,
+        //     error: 'No device found'
+        //   }) 
+        // } 
+
+        // if (conn.device) {
+        //   if (!conn.ble) setConn({
+        //     ble: true
+        //   })
+        //   let device = conn.device;
+        //   device
+        //             .readCharacteristicForService(BLE_CONF.service, BLE_CONF.message)
+        //             .then(v => {
+        //                 let val = JSON.parse(decode(v?.value));
+        //                 setValue({
+        //                   message: val,
+        //                 })
+        //             });
+
+        //         device
+        //             .readCharacteristicForService(BLE_CONF.service, BLE_CONF.box)
+        //             .then(v => {
+        //               let val = JSON.parse(decode(v?.value));
+        //               setValue({
+        //                 box: val
+        //               })
+        //             });
+                
+        //         device.monitorCharacteristicForService(
+        //             BLE_CONF.service, 
+        //             BLE_CONF.message, 
+        //             (error, char) => {
+        //                 if (!char) return
+        //                 let val = JSON.parse(decode(char?.value));
+        //                 setValue({
+        //                   message: val
+        //                 })
+                        
+        //             },
+        //             "messagetransaction"
+        //         );
+                
+        //         device.monitorCharacteristicForService(
+        //             BLE_CONF.service, 
+        //             BLE_CONF.box, 
+        //             (error, char) => {
+        //                 if (!char) return
+        //                 let val = JSON.parse(decode(char?.value));
+        //                 setValue({
+        //                   box: val
+        //                 })
+        //             },
+        //             "boxtransaction"
+        //         );
+
+        // }
+        
+       
+  
+        
+        
         
         await sleep(delay)
         
@@ -327,8 +375,8 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
               // ]);
            
               let c = !conn.ble;
-              
-              if (c) {
+
+              if (c && !isRunning()) {
          
                 // setShowConnecting(true)
                 await start(client);
@@ -359,7 +407,7 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
             })}
             text="VIEW STATS"
           />
-          <Text className='text-[#0e0e0e]'>Dc: {dc}</Text>
+          <Text className='text-[#0e0e0e]'>Dc+: {dc}</Text>
           <Text className='text-[#0e0e0e]'>Device: {conn.device?.name}</Text>
           <Text className='text-[#0e0e0e]'>Message: {value.message}</Text>
           <View className="min-h-10 bg-[#0e0e0e]"></View>
