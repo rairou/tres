@@ -75,8 +75,9 @@ void TresBLE::start(){
 }
 
 void TresBLE::sendLocNotif() {
-  message_characteristic->setValue("location");
-  message_characteristic->notify();
+    message_characteristic->setValue("location");
+    message_characteristic->notify();
+    Serial.println("Location notification notified");
 }
 
 void TresBLE::clearMessage() {
