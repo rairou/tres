@@ -1,5 +1,5 @@
 
-// For some reason I don't know why ESP 32 cannont identifies header files within
+// For some reason I don't know why ESP 32 cannont identify header files within
 // the subdirectory. I don't want to spent much time debugging, PRs are open.
 // It would be nice and cleaner if all the header / cpp files where store at tres/ subdir.
 
