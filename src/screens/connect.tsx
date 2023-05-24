@@ -66,16 +66,60 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
   const [showDialog, setShowDialog] = React.useState(false);
   const [showConnecting, setShowConnecting] = React.useState(false);
   const [dc, setDc] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-  const scan = async (connectionHandler: (device: Device) => void) => {
-    ble.startDeviceScan(null, null, (error, scannedDevice) => {
-      console.log(`Devices: ${scannedDevice}`);
-      if (scannedDevice && scannedDevice.name === BLE_CONF.name) {
-          ble.stopDeviceScan();
-          connectionHandler(scannedDevice);
+  const scan = async () => {
+    let c = !conn.ble;
+
+    if (!BackgroundService.isRunning()) {
+      setDc(true);
+      if (!conn.device) {
+        console.log('Scanning devices...');
+        ble.startDeviceScan(null, null, async (error, d) => {
+          console.log(`Devices: ${d}`);
+          if (d && d.name === BLE_CONF.name) {
+              ble.stopDeviceScan();
+              setError("");
+              let connectedDevice = await d.connect();
+              setConn({
+                ble: true,
+                device: connectedDevice
+              })
+              
+              await start(client);
+          } else {
+            ble.stopDeviceScan();
+            setConn({
+              ble: false,
+              device: null,
+              error: 'No device found'
+            })
+          }
+        });
+        setError("No device found");
+       
+      } else if (conn.device && !conn.ble) {
+        await start(client);
       }
-    });
-  
+    } else {
+      setDc(false);
+      setConn({
+        ble: false,
+        device: null,
+        error: ''
+      })
+      if (conn.device) await disconnectDevice();
+      await stop();
+    }
+    
+    // start(client);
+    // if (isRunning()) {
+    //   console.log('running');
+    //   await stop();
+    // } else {
+    //   console.log('dead');
+    //   await stop();
+    // }
   }
 
   
@@ -98,35 +142,6 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
     // if (conn.error) setShowDialog(true)
   }, []);
 
- 
-  
-  const connectDevice = async (device: Device) => {
-    
-        device
-            .connect()
-            .then(device => {
-                setConn({
-                  ble: true,
-                  device: device,
-                  error: ''
-                })
-                return device.discoverAllServicesAndCharacteristics();
-            })
-            .then(device => {
-                ble.onDeviceDisconnected(device.id, (error, device) => {
-                    console.log(`Device : ${device?.id} disconnected`);
-                    setConn({
-                      ble: false
-                    })
-                    setDc(true);
-                });
-                console.log("Connection established");
-
-            });
-        
-
-
-  }
 
   const disconnectDevice = async () => { 
     let device = conn.device;
@@ -139,7 +154,8 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
             .then(() => {
                 console.log('Disconnected');
                 setConn({
-                  ble: false
+                  ble: false,
+                  device: null
                 })
             })
     }
@@ -148,74 +164,95 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
 
   const client = async (data: any) : Promise<void> => {
     await new Promise(async (resolve) => {
-      const { delay } = data?.delayw || 1000;
+      const { delay } = data?.delay || 1000;
 
       console.log(`Background task status: ${BackgroundService.isRunning()} with delay ${delay}`);
       for (let i = 0; BackgroundService.isRunning(); i++) {
-
-        const posHandler = async (pos: GeolocationResponse) => {
-          let c = pos.coords;
-
-          setLoc({
-            lat: c.latitude,
-            long: c.longitude
-          })
-  
-          if (BackgroundService.isRunning()) {
-            // await BackgroundService.updateNotification({
-            //     // taskDesc: `Latitude: ${c.latitude}; Longitude: ${c.longitude}`
-            // });
-          }
-        }
-
-        Geolocation.getCurrentPosition(posHandler);
-
-        if (!conn.device) {
-          ble.startDeviceScan(null, null, (error, device) => {
-            if (device && device.name == BLE_CONF.name) {
-              ble.stopDeviceScan();
-              setConn({
-                ble: false,
-                device: device
-              })
-              connectionHandler(device);
-            }
-          })
-        } 
-
-        const connectionHandler = (device: Device) => {
-          if (!conn.ble) {
-            device
-              .connect()
-              .then(d => {
-                setConn({
-                  ble: true,
-                  device: device
-                })
-                return device.discoverAllServicesAndCharacteristics();
-              })
-              .then(d => {
-                d.readCharacteristicForService(BLE_CONF.service, BLE_CONF.message)
-                  .then(v => {
-                    setValue({
-                      message: decode(v.value)
-                    })
-                  })
-              })
-          }
-        }
-
         if (conn.device) {
-          conn.device
-            .connect()
-            .then(device => {
-              setConn({
-                device: device,
-                ble: true
-              })
+          // setDc(true);
+          let device = conn.device;
+          if (device && !conn.ble) {
+            setConn({
+              ble: true,
+              device: device
             })
+          }
+          
+          device.discoverAllServicesAndCharacteristics()
+            
+            .then(device => {
+              ble.onDeviceDisconnected(device.id, (e, d) => {
+                setConn({
+                  ble: false,
+                  device: null
+                })
+              });
+
+              device.readCharacteristicForService(
+                BLE_CONF.service,
+                BLE_CONF.message
+              )
+                .then(value => {
+                  setValue({
+                    message: decode(value.value)
+                  });
+                })
+
+                device.readCharacteristicForService(
+                  BLE_CONF.service,
+                  BLE_CONF.box
+                )
+                  .then(value => {
+                    setValue({
+                      message: decode(value.value)
+                    });
+                  })
+  
+
+              device.monitorCharacteristicForService(
+                BLE_CONF.service,
+                BLE_CONF.message,
+                (e, char) => {
+                  setValue({
+                    message: char?.value
+                  })
+                },
+                "messsageransaction"
+              )
+    
+              device.monitorCharacteristicForService(
+                BLE_CONF.service,
+                BLE_CONF.box,
+                (e, char) => {
+                  setValue({
+                    box: char?.value
+                  })
+                },
+                "boxtransaction"
+              )
+            })
+          
+          
+          const posHandler = async (pos: GeolocationResponse) => {
+            let c = pos.coords;
+
+            setLoc({
+              lat: c.latitude,
+              long: c.longitude
+            })
+    
+            if (BackgroundService.isRunning()) {
+              // await BackgroundService.updateNotification({
+              //     // taskDesc: `Latitude: ${c.latitude}; Longitude: ${c.longitude}`
+              // });
+            }
+          }
+
+          Geolocation.getCurrentPosition(posHandler);
+
         }
 
+       
         
         if (value.message?.startsWith('location') && conn.device) {
           sendLocationData(conn.device?.id, `loc|${loc?.lat}|${loc?.long}`);
@@ -288,17 +325,13 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
 
         // }
         
-       
-  
-        
-        
-        
         await sleep(delay)
         
       }
     });
   }
 
+  
 
   return (
     <SafeAreaView className="flex-1 bg-[#F1EAD8] justify-center">
@@ -364,41 +397,9 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
 
         <View className="flex-1 pt-4">
           <Button
-            onPress={async () => {
-              // Alert.alert('TRES', 'Connect button pressed', [
-              //   {
-              //     text: 'Cancel',
-              //     onPress: () => console.log('Cancel Pressed'),
-              //     style: 'cancel',
-              //   },
-              //   {text: 'OK', onPress: () => console.log('OK Pressed')},
-              // ]);
-           
-              let c = !conn.ble;
-
-              if (c && !isRunning()) {
-         
-                // setShowConnecting(true)
-                await start(client);
-              
-      
-              } else {
-                await disconnectDevice();
-                await stop();
-              } 
-              // ble.stopDeviceScan();
-              // ble.startDeviceScan(null, null, (error, scannedDevice) => {
-              //   if (error) {
-              //     console.log('E: ', error);
-              //   }
-              //   console.log(scannedDevice);
-                
-              // })
-
-
-            }}
-            text={`${conn.ble ? 'DISCONNECT' : (conn.error ? conn.error : 'CONNECT')}`}
-            background={`${conn.ble ? '#719372' : '#a78587'}`}
+            onPress={scan}
+            text={`${conn.device ? 'DISCONNECT' : (conn.error ? conn.error : 'CONNECT')}`}
+            background={`${conn.device ? '#719372' : '#a78587'}`}
           />
           <View className="h-3"></View>
           <Button
@@ -407,9 +408,10 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
             })}
             text="VIEW STATS"
           />
-          <Text className='text-[#0e0e0e]'>Dc+: {dc}</Text>
+          <Text className='text-[#0e0e0e]'>Dc+: {dc ? 'a' : 'b'}</Text>
           <Text className='text-[#0e0e0e]'>Device: {conn.device?.name}</Text>
           <Text className='text-[#0e0e0e]'>Message: {value.message}</Text>
+          <Text className='text-[#0e0e0e]'>Error: {error}</Text>
           <View className="min-h-10 bg-[#0e0e0e]"></View>
         </View>
       </View>

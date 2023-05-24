@@ -1,5 +1,5 @@
 
-// For some reason I don't know why ESP 32 cannont identifies header files within
+// For some reason, I don't know why ESP 32 can not identify header files within
 // the subdirectory. I don't want to spent much time debugging, PRs are open.
 // It would be nice and cleaner if all the header / cpp files where store at tres/ subdir.
 
@@ -11,17 +11,22 @@
 #include "btn.h"
 #include "pin.h"
 #include "server.h"
+#include "globals.h"
+#include "led.h"
+#include "gsm.h"
 
+TresGSM sim;
 TresBLE server;
 button btn(BTN_PIN);
+RGBLed led(RED_PIN, GREEN_PIN, BLUE_PIN);
 
-bool state = false;
 
 void setup() {
   Serial.begin(9600);
   setupPins();
   server.init();
   server.start();
+
 }
 
 
@@ -30,10 +35,37 @@ void loop() {
 
   if (btn.isPressed(3)) {
     Serial.println("SOS");
-    state = !state;
-    digitalWrite(LED_PIN, state);
     server.sendLocNotif();
     server.clearMessage();
+  }
+  
+  switch (state) {
+    case send:
+      // send sms
+      
+      break;
+    case connected:
+      led.connected(2000);
+      state = none;
+      break;
+    case disconnected:
+      led.connected(200);
+      led.connected(200);
+      state = none;
+      break;
+
+    case idle:
+      led.success(500);
+      state = none;
+      break;
+    case error:
+      led.error(1500);
+      state = none;
+      break;
+    case sent:
+      led.success(2000);
+      state = none;
+      break;
   }
 
 }

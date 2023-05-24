@@ -16,19 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import base64 from "react-native-base64";
+// Credits: milliohm
 
-export const sleep = (time: number): Promise<void> => 
-    new Promise((resolve) => setTimeout(() => resolve(), time));
+#include <Arduino.h>
+#include "gsm.h"
+
+String _buffer;
+int _timeout;
 
 
-export const encode = (s: string | null | undefined): string => {
-    if (!s) return "";
-    return base64.encode(s);
+TresGSM::TresGSM() {}
+
+void TresGSM::begin() {
+  this->begin(BAUD_RATE);
 }
-
-export const decode = (s: string | null | undefined) : string => {
-    if (!s) return "";
-    return base64.decode(s);
+void TresGSM::begin(long baud_rate) {
+  Serial2.begin(baud_rate);
+    _buffer.reserve(50);
+    // Check if registered
+    Serial2.println("CREG?");
+    if (Serial2.available()) {
+        Serial.println(Serial2.readString());
+    }
+    Serial.print("SIM: ");
+    Serial.println(Serial2.readString());
+  
 }
-

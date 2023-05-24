@@ -16,19 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import base64 from "react-native-base64";
+#ifndef _PIN_H
+#define _PIN_H
 
-export const sleep = (time: number): Promise<void> => 
-    new Promise((resolve) => setTimeout(() => resolve(), time));
+#define LED_BUILTIN 2
+#define RED_PIN 25
+#define GREEN_PIN 26
+#define BLUE_PIN 27
+#define BTN_PIN 33
 
+void setupPins();
 
-export const encode = (s: string | null | undefined): string => {
-    if (!s) return "";
-    return base64.encode(s);
-}
-
-export const decode = (s: string | null | undefined) : string => {
-    if (!s) return "";
-    return base64.decode(s);
-}
-
+#endif

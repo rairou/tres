@@ -16,12 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _GSM_H
+#define _GSM_H
 
-#include "pin.h"
-#include <Arduino.h>
+#define BAUD_RATE 9600
 
-void setupPins() {
-    pinMode(BTN_PIN, INPUT);
-    pinMode(LED_PIN, OUTPUT);
-    Serial.println("Pins were setup properly");
-}
+class TresGSM {
+    public:
+      TresGSM();
+      void send_loc(char* number);
+      void begin();
+      void begin(long baud_rate);
+
+};
+
+#endif 

@@ -17,10 +17,12 @@
 */
 
 #include "server.h"
+#include "globals.h"
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+
 
 BLECharacteristic *message_characteristic;
 BLECharacteristic *box_characteristic;
@@ -34,7 +36,7 @@ TresBLE::TresBLE() {
 }
 
 void TresBLE::init() {
-    
+    state = idle;
     BLEDevice::init("TRES");
     server = BLEDevice::createServer();
     server->setCallbacks(new ServerCallbacks());
@@ -87,10 +89,12 @@ void TresBLE::clearMessage() {
 
 void ServerCallbacks::onConnect(BLEServer *pServer) {
     Serial.println("Connected");
+    state = connected;
 }
 
 void ServerCallbacks::onDisconnect(BLEServer *pServer) {
     Serial.println("Disconnected");
+    state = disconnected;
 }
 
 void CharacteristicsCallbacks::onWrite(BLECharacteristic *pChar) {

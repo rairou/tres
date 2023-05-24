@@ -16,19 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import base64 from "react-native-base64";
+#include "globals.h"
 
-export const sleep = (time: number): Promise<void> => 
-    new Promise((resolve) => setTimeout(() => resolve(), time));
-
-
-export const encode = (s: string | null | undefined): string => {
-    if (!s) return "";
-    return base64.encode(s);
-}
-
-export const decode = (s: string | null | undefined) : string => {
-    if (!s) return "";
-    return base64.decode(s);
-}
-
+state_t state = none;
+char* location = "";

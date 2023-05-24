@@ -16,13 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _PIN_H
-#define _PIN_H
+#ifndef _LED_H
+#define _LED_H
 
-#define LED_BUILTIN 2
-#define LED_PIN 27
-#define BTN_PIN 26
+#define RES 8 // 8-bit res. 0-255
+#define FREQ 5000
+#define R_CHANNEL 0 // Red pin channel
+#define G_CHANNEL 1 // Green pin channel
+#define B_CHANNEL 2 // Blue pin channel
 
-void setupPins();
+class RGBLed {
+    public:
+        RGBLed(int r_pin, int g_pin, int b_pin);
+        void setColor(int R, int G, int B);
+        void error(int d);
+        void error();
+        void warning(int d);
+        void warning();
+        void success(int d);
+        void success();
+        void connected(int d);
+        void connected();
+        void clear();
+
+    private:
+        int r_pin_;
+        int g_pin_;
+        int b_pin_;
+
+};
 
 #endif

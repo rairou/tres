@@ -16,19 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import base64 from "react-native-base64";
+// global variable for indicator
+#ifndef _GLOBALS_H
+#define _GLOBALS_H
 
-export const sleep = (time: number): Promise<void> => 
-    new Promise((resolve) => setTimeout(() => resolve(), time));
+// server state
+typedef enum  {
+    none,
+    connected,
+    disconnected,
+    received,
+    idle,
+    send, // notification to send message
+    sent, // sms message sent
+    error, // error handling
+} state_t;
 
+extern state_t state;
+extern char* location; 
 
-export const encode = (s: string | null | undefined): string => {
-    if (!s) return "";
-    return base64.encode(s);
-}
-
-export const decode = (s: string | null | undefined) : string => {
-    if (!s) return "";
-    return base64.decode(s);
-}
-
+#endif

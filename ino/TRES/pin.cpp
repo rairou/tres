@@ -16,19 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import base64 from "react-native-base64";
 
-export const sleep = (time: number): Promise<void> => 
-    new Promise((resolve) => setTimeout(() => resolve(), time));
+#include "pin.h"
+#include <Arduino.h>
 
-
-export const encode = (s: string | null | undefined): string => {
-    if (!s) return "";
-    return base64.encode(s);
+void setupPins() {
+    pinMode(BTN_PIN, INPUT);
+    Serial.println("Pins were setup properly");
 }
-
-export const decode = (s: string | null | undefined) : string => {
-    if (!s) return "";
-    return base64.decode(s);
-}
-
