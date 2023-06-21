@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,19 +19,20 @@
 
 // Ok here comes the boring part. I have no idea how to make this a less messy.
 // The only thing I can imagine of is by defining each types which is sucks, I know.
-// - riyuzenn
+// - rairou
 
 
 import type {StackScreenProps} from '@react-navigation/stack';
 import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
+import { TresDoc } from './data';
 
 export type RootStackParamList = {
-  Connect: undefined;
-  _Auth: { connect: boolean };
+  _Auth:  undefined;
 };
 
 export type AuthStackParamList = {
-  Auth: { connect: boolean };
+  Auth:  undefined;
+  Connect: undefined;
   Main: undefined;
 };
 
@@ -39,13 +40,13 @@ export type DeviceStackParamList = {
   FindDevice: undefined;
   Register: undefined;
   Login: undefined;
-  Realtime: undefined;
+  Realtime: { deviceId: string };
 };
 
 // Bottom Tabs screen
 export type TabParamList = {
   Home: undefined;
-  Stats: undefined;
+  Stats: { data: TresDoc[], name: string };
   Device: undefined;
   Settings: undefined;
 };
@@ -58,7 +59,7 @@ export type SettingsScreenProps = BottomTabScreenProps<
 >;
 
 export type ConnectScreenProps = StackScreenProps<
-  RootStackParamList,
+  AuthStackParamList,
   'Connect'
 >;
 export type AuthScreenProps = StackScreenProps<AuthStackParamList, 'Auth'>;

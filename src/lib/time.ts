@@ -16,41 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface SMSData {
-    id: string;
-    number: string;
+export enum Data {
+    Today,
+    ThisWeek,
+    LastWeek,
+    MoreThanAWeek
 }
 
-export interface TresSettings {
-    interval: number;
-    auto_connect: boolean;
-    emergency_numbers: Array<SMSData>
+export function getTime(timestamp: number, mins: number) {
+    return timestamp + minsToMs(mins);
 }
 
-export interface TresDoc {
-    id: string;
-    lat: number;
-    long: number;
-    timestamp: number;
-
+export function daysToMs(day: number) {
+    return day * 24 * 60 * 60 * 1000;
 }
 
-export interface TresCol {
-    version: string;
-    data: string;
-    settings: TresSettings
-    last_updated: number;
-    _iv: string;
+export function minsToMs(min: number) {
+    return min * 60 * 1000;
 }
 
-export interface Location {
-    lat: number | null;
-    long: number | null;
-}
+export function compareDate(timestamp: number) {
+    const prev = new Date(timestamp);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - prev.getTime());
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-export interface TransactionData {
-    type: 'location' | 'raw' | 'notif';
-    message: string;
-    data?: Location | {};
-    timestamp: number;
+
+    if (days === 1) return Data.Today
+    if (days < 7) return Data.ThisWeek;
+    else if (days  >= 7 && days <= 14) return Data.LastWeek;
+    else return Data.MoreThanAWeek
 }

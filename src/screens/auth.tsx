@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 import React from "react";
 
 import { FileSystem } from "react-native-file-access";
-import {SafeAreaView, Text, Alert } from 'react-native';
+import {SafeAreaView, Text, Alert, ToastAndroid, BackHandler } from 'react-native';
 import Pin from '../components/pin';
 import {AuthScreenProps} from '../interfaces/screen';
 import { useGlobalState } from '../lib/state';
@@ -33,7 +33,6 @@ const AuthScreen: React.FC<AuthScreenProps> = props => {
   const [_iv, setIv] = useGlobalState("iv");
   const [exist, setExist] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const { connect } = props.route.params;
 
   React.useEffect(() => {
 
@@ -44,7 +43,6 @@ const AuthScreen: React.FC<AuthScreenProps> = props => {
 
   }, []);
 
-  
 
   
   return (
@@ -62,14 +60,26 @@ const AuthScreen: React.FC<AuthScreenProps> = props => {
         db.getIv().then((v) => {
           setIv(v);
         })
+
         
         setLoading(true)
+        if (!exist) {
+          ToastAndroid.showWithGravity(
+            'Database created, please re-open the app',
+            ToastAndroid.SHORT,
+            ToastAndroid.BOTTOM
+          );
+
+          BackHandler.exitApp();
+            
+        }
+
         checkEncryptionKey(getDbPath(), k)
           .then(v => {
             setLoading(false)
             const b = () => {
-              props.navigation.navigate("Main")
               setKey(k);
+              props.navigation.navigate("Connect")
             }
             const a =() => {
               Alert.alert('TRES', `Error: Invalid pin (${pin.join("")})`, [
@@ -85,7 +95,8 @@ const AuthScreen: React.FC<AuthScreenProps> = props => {
           .catch(e => {
             console.log(`Failure : ${e}`)
           });
-      }} />
+      }}
+      />
       
     </SafeAreaView>
   );

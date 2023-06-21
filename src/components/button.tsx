@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -83,6 +83,7 @@ export default function Button({
   onPress, 
   text, 
   klass = '', 
+  small  = false,
   icon = null, 
   disabled = false,
   padding = {
@@ -95,6 +96,7 @@ export default function Button({
   shadow = true
 }: ButtonProps) {
   const bg = icon ? '#d5d5d5' : background;
+  const  size =  small ?  'max-w-[30vw]' : 'max-w-[70vw]'
   return (
     <Pressable className={
       `
@@ -105,7 +107,7 @@ export default function Button({
       `
     }  disabled={disabled} onPress={onPress}>
       {({pressed}) => (
-        <View className={`max-w-[70vw] bg-[#0e0e0e] rounded-xl`}>
+        <View className={`${size} bg-[#0e0e0e] rounded-xl`}>
         <View
           style={{
             transform: disabled || !shadow ? [] : [
@@ -116,8 +118,8 @@ export default function Button({
           }}
           className={
             `
-            flex-row max-w-[70vw] space-x-2 
-            min-w-[70vw] items-center justify-center 
+            flex-row ${size} space-x-2 
+            ${small ? 'min-w-[30vw]': 'min-w-[70vw]'} items-center justify-center 
             rounded-xl ${disabled ? 'opacity-70' : 'border-[1.5px] border-black'}
             py-3 font-bold ${klass}
             `

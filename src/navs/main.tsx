@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,14 +29,51 @@ import StatsScreen from '../screens/stats';
 import SettingsScreen from '../screens/settings';
 import {TabParamList} from '../interfaces/screen';
 import { useNavigation } from '@react-navigation/native';
+import { useGlobalState } from "../lib/state";
+import { Data, compareDate } from "../lib/time";
+import { TresDoc } from "../interfaces/data";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function MainNavigator() {
-  const navigation = useNavigation();
+  const [db, setDb] = useGlobalState('db');
+  const [locations, setLocations] = useGlobalState('locationHistory');
+  const [locToday, setLocToday] = useGlobalState('locToday');
+  const [locThisWeek, setLocThisWeek] = useGlobalState('locThisWeek');
+  const [locLastWeek, setLocLastWeek] = useGlobalState('locLastWeek');
+  const [locMoreThanWeek, setLocMoraThanWeek] = useGlobalState('locMoreThanWeek');
+
+  const [df, setDf] = React.useState<TresDoc[]>([]);
+
   React.useEffect(() => {
-    navigation.addListener('beforeRemove', (e) => e.preventDefault());
-  }, [navigation])
+    db?.get()
+      .then(v => {
+        setLocations(v);
+        v.map((v, i) => {
+          switch (compareDate(v.timestamp)) {
+            case Data.Today:
+              if(locToday.some(i  => i.id === v.id)) break;
+              setLocToday([...locToday, v])
+              break;
+            case Data.ThisWeek:
+              if(locThisWeek.some(i  => i.id === v.id)) break;
+              setLocThisWeek([...locThisWeek, v])
+              break;
+            case  Data.LastWeek:
+              if(locLastWeek.some(i  => i.id === v.id)) break;
+              setLocLastWeek([...locLastWeek,  v]);
+              break;
+            case Data.MoreThanAWeek:
+              if(locMoreThanWeek.some(i  => i.id === v.id)) break;
+              setLocMoraThanWeek([...locMoreThanWeek, v]);
+              break;
+            default:
+              break;
+          }
+        })
+      })
+   }, []);
+
   return (
     <>
       <StatusBar backgroundColor="#F1EAD8" barStyle="dark-content" />
@@ -45,7 +82,10 @@ export default function MainNavigator() {
         screenOptions={{headerShown: false}}
         initialRouteName="Home">
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Stats" component={StatsScreen} />
+        <Tab.Screen initialParams={{
+          data: locToday,
+          name: `${locToday.length} total place/s visited today`
+        }}  name="Stats"  component={StatsScreen} />
         <Tab.Screen name="Device" component={DeviceNavigator} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
       </Tab.Navigator>

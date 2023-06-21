@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,50 +19,103 @@
 
 import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import {SafeAreaView, View, Text, LogBox} from 'react-native';
+import {
+  SafeAreaView, 
+  View, 
+  Image, 
+  Text, 
+  FlatList,
+  ListRenderItem,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 import {HomeScreenProps} from '../interfaces/screen';
-import { LOCATION, useGlobalState } from '../lib/state';
-import { location_permission } from "../lib/perm";
-import { sleep } from "../lib/utils";
-import { BackgroundService, start, stop } from '../lib/task';
-import Geolocation from '@react-native-community/geolocation';
+import { Data, compareDate } from '../lib/time';
+import { useGlobalState } from '../lib/state';
+import { Location, TresDoc } from '../interfaces/data';
+import { Geolocation } from '../lib/task';
+import uuid from 'react-native-uuid';
 import Button from '../components/button';
-import { ble } from '../lib/ble';
-import { Device } from 'react-native-ble-plx';
+import { AndroidSuccessTypes, DirectSms, SendSMS } from '../lib/sms';
 
-LogBox.ignoreLogs(["new NativeEmitter"])
-LogBox.ignoreAllLogs();
 
-interface TaskData {
-    delay: number;
+function Item({ data }: { data: TresDoc }) {
+  return (
+    <TouchableOpacity>
+      <Text>{data.lat} {data.long} {data.timestamp}</Text>
+    </TouchableOpacity>
+  )
 }
 
 
 const HomeScreen: React.FC<HomeScreenProps> = props => {
-  const [loc, setLoc] = useGlobalState('loc');
-  const [val, setVal] = useGlobalState('value');
-  const [devices, setDevices] = React.useState<Device[]>([]);
+  const [db, setDb] = useGlobalState('db');
+  const [locations, setLocations] = useGlobalState('locationHistory');
+  const [locToday, setLocToday] = useGlobalState('locToday');
+  const [locThisWeek, setLocThisWeek] = useGlobalState('locThisWeek');
+  const [locLastWeek, setLocLastWeek] = useGlobalState('locLastWeek');
+  const [locMoreThanWeek, setLocMoraThanWeek] = useGlobalState('locMoreThanWeek');
 
-  let running = BackgroundService.isRunning();
+  const [loc, setLoc] = React.useState({
+    long: 0,
+    lat: 0,
+  });
 
-  const scan = () => {
-    // ble.startDeviceScan(null, null, (error, device) => {
-    //   if (device && device.name == "TRES") {
-    //     setDevices([...devices, device])
-    //   }
-    // })
-    ble.connectToDevice("B8:D6:1A:41:D8:CE").then((device) => {
-      setDevices([...devices, device])
-    })
-  }
-  
   React.useEffect(() => {
-      location_permission();
-      
-  }, []);
+    db?.get()
+      .then(v => {
+        console.log(`Locations`, v);
+        setLocations(v);
+        v.map((v, i) => {
+          switch (compareDate(v.timestamp)) {
+            case Data.Today:
+              if(locToday.some(i  => i.id === v.id)) break;
+              setLocToday([...locToday, v])
+              break;
+            case Data.ThisWeek:
+              if(locThisWeek.some(i  => i.id === v.id)) break;
+              setLocThisWeek([...locThisWeek, v])
+              break;
+            case  Data.LastWeek:
+              if(locLastWeek.some(i  => i.id === v.id)) break;
+              setLocLastWeek([...locLastWeek,  v]);
+              break;
+            case Data.MoreThanAWeek:
+              if(locMoreThanWeek.some(i  => i.id === v.id)) break;
+              setLocMoraThanWeek([...locMoreThanWeek, v]);
+              break;
+   
+          }
+        })
+      })
+    Geolocation.getCurrentPosition((pos) => {
+      let c = pos.coords;
+      setLoc({
+        lat: c.latitude,
+        long: c.longitude
+      })
+    })
+  }, [])
 
-  return (
-    <SafeAreaView className="flex-1 px-5 pt-12 bg-[#F1EAD8]">
+  if (!locations) return  (
+  <SafeAreaView className="flex-1 justify-center items-center bg-[#F1EAD8]">
+    
+        <Text className="text-[#0e0e0e] text-lg pt-10" style={{ fontFamily: 'JetBrains Mono' }}>
+            Empty History
+        </Text>
+        
+        </SafeAreaView>
+  )
+  return (      
+      <ScrollView showsVerticalScrollIndicator={false} className='' contentContainerStyle={{ 
+        flexGrow: 1, 
+        paddingLeft: 0
+      }} style={{ 
+        width: '100%', 
+        paddingLeft: 0, 
+      }}>
+        
+      <SafeAreaView className="flex-1 px-5 pt-12 bg-[#F1EAD8]">
       <View className="">
         <Text
           className="text-[#0e0e0e] font-semibold text-[40px]"
@@ -72,32 +125,86 @@ const HomeScreen: React.FC<HomeScreenProps> = props => {
             className="text-[#a78587]"
             style={{fontFamily: 'JetBrains Mono'}}>
             {' '}
-            2{' '}
+            {locToday.length}{' '}
           </Text>
-          places TODAY!
+          place/s TODAY!
         </Text>
-        <Button onPress={scan} text='Scan' padding={{ top: 2 }} />
-        <Button onPress={async () => {
-          if (running) await stop();
-        }}  text="Stop" />
-        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
-          Lat: {loc?.lat}; Long: {loc?.long}
-        </Text>
-        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
-          Device goes here
-        </Text>
-        {devices.map((v, i) => {
-          return (<Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
-          Device: {v.name};{v.id}
-        </Text>
-          )
-        })}
-        <Text className='text-[#0e0e0e]' style={{ fontFamily: 'JetBrains Mono' }}>
-          Type: ${val.message} Message: {val.message}
-        </Text>
+        <View>
+
+        <TouchableOpacity onPress={() => {
+          props.navigation.navigate('Stats', {
+            data: locToday,
+            name: `${locToday.length} total place/s visited today.`
+          })
+        }} className='pt-2'>
+              <Text className='text-[#0e0e0e] underline' style={{ fontFamily: 'JetBrains Mono' }}>
+                Learn More &rarr;
+              </Text>
+            </TouchableOpacity>
+          
+        </View>
+        <View className='pt-12'>
+          <View className='py-2'>
+          <View className="border border-t-[#0e0e0e] border-b-[#0e0e0e]">
+          <Text className="py-2 text-[20px] px-2 extrabold text-[#0e0e0e]" style={{ fontFamily: 'JetBrains Mono' }}>
+            {locThisWeek.length} <Text className='text-[15px]'>place/s you've visited <Text className='font-semibold'>this week</Text></Text>
+            {locThisWeek.length >= 1 && (
+              
+              <TouchableOpacity onPress={() => {
+                props.navigation.navigate("Stats", { data: locThisWeek, name: `${locThisWeek.length} total place/s visited this week` })
+              }} className='pt-2'>
+              <Text className='text-[#0e0e0e] underline' style={{ fontFamily: 'JetBrains Mono' }}>
+                Learn More &rarr;
+              </Text>
+            </TouchableOpacity>
+            )}
+          </Text>
+          </View>
         
-      </View>
+          </View>
+          <View className='py-2'>
+          <View className="border border-t-[#0e0e0e] border-b-[#0e0e0e]">
+          <Text className="py-2 text-[20px] px-2 extrabold text-[#0e0e0e]" style={{ fontFamily: 'JetBrains Mono' }}>
+            {locLastWeek.length} <Text className='text-[15px]'>place/s you've visited <Text className='font-semibold'>last week</Text></Text>
+            {locLastWeek.length >= 1 && (
+              
+              <TouchableOpacity onPress={() => {
+                props.navigation.navigate("Stats", { data: locLastWeek, name: `${locLastWeek.length} total place/s visited last week` })
+              }} className='pt-2'>
+              <Text className='text-[#0e0e0e] underline' style={{ fontFamily: 'JetBrains Mono' }}>
+                Learn More &rarr;
+              </Text>
+            </TouchableOpacity>
+            )}
+          </Text>
+          </View>
+        
+          </View>
+          
+          <View className='py-2'>
+          <View className="border border-t-[#0e0e0e] border-b-[#0e0e0e]">
+          <Text className="py-2 text-[20px] px-2 extrabold text-[#0e0e0e]" style={{ fontFamily: 'JetBrains Mono' }}>
+            {locMoreThanWeek.length} <Text className='text-[15px]'>place/s you've visited <Text className='font-semibold'>more than a week</Text></Text>
+            {locMoreThanWeek.length >= 1 && (
+              
+              <TouchableOpacity  onPress={() => {
+                props.navigation.navigate("Stats", { data: locMoreThanWeek, name: `${locLastWeek.length} total place/s visited more than week` })
+              }}className='pt-2'>
+              <Text className='text-[#0e0e0e] underline' style={{ fontFamily: 'JetBrains Mono' }}>
+                Learn More &rarr;
+              </Text>
+            </TouchableOpacity>
+            )}
+          </Text>
+          </View>
+        
+          </View>
+       
+        </View>
+    </View>
     </SafeAreaView>
+    </ScrollView>
+    
   );
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,24 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 import React from 'react';
-import {SafeAreaView, View, Text, Image, Alert, StatusBar, Modal, Pressable, LogBox} from 'react-native';
+import {SafeAreaView, ToastAndroid, BackHandler, View, Text, Image, Alert, PermissionsAndroid, Platform, StatusBar, Modal, Pressable, LogBox} from 'react-native';
 import Button from '../components/button';
 import {ConnectScreenProps} from '../interfaces/screen';
-import { Location, TransactionData } from '../interfaces/data';
+import { Location, TransactionData, TresCol } from '../interfaces/data';
 import { useGlobalState } from '../lib/state';
 import Loading from '../components/loading';
 import { BackgroundService, start, stop, Geolocation, isRunning } from '../lib/task';
-import { decode, sleep } from "../lib/utils";
+import { decode, encode, sleep } from "../lib/utils";
 import { BLE_CONF, ble, scanDevice, sendLocationData } from "../lib/ble";
-import { Device } from 'react-native-ble-plx';
-import { bluetooth_permission, location_permission } from '../lib/perm';
-import { PERMISSIONS, check } from 'react-native-permissions';
-import { GeolocationResponse } from '@react-native-community/geolocation';
+import { BleError, Characteristic, Device } from 'react-native-ble-plx';
+import { tresdb } from '../lib/db';
+import { getDbPath } from '../lib/path';
+import { DirectSms, sendLocation } from '../lib/sms';
+import { daysToMs, getTime, minsToMs } from '../lib/time';
+import uuid from 'react-native-uuid';
 
-// LogBox.ignoreLogs(["new NativeEventEmitter"])
-LogBox.ignoreAllLogs();
+LogBox.ignoreLogs(["new NativeEventEmitter"])
+// LogBox.ignoreAllLogs();
 
 type DialogProps = {
   visible: boolean;
@@ -55,6 +56,36 @@ export const options = {
   }
 }
 
+const requestPerm = async () => {
+  // const bleScanPerm = await PermissionsAndroid.request(
+  //     PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+  //     {
+  //         title: "Location Permission",
+  //         message: "BLE requires location",
+  //         buttonPositive: "OK",
+  //     }
+  // );
+  // const bleConnectPerm = await PermissionsAndroid.request(
+  //     PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+  //     {
+  //         title: "Location Permission",
+  //         message: "BLE requires Location",
+  //         buttonPositive: "OK"
+  //     }
+  // );
+  const fineLocationPerm = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+          title: "Location Permission",
+          message: "BLE requires Location",
+          buttonPositive: "OK"
+      }
+  );
+    
+  return (
+      fineLocationPerm === "granted" 
+  )
+}
 
 
 const ConnectScreen: React.FC<ConnectScreenProps> = props => {
@@ -67,89 +98,188 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
   const [showConnecting, setShowConnecting] = React.useState(false);
   const [dc, setDc] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [count, setCount] = React.useState(0);
+  const [monitor, setMonitor] = React.useState(false);
+  const [msgChar, setMsgChar] = React.useState<Characteristic | null>(null);
+  const [msgError, setMsgError] = React.useState<BleError | null>(null);
+  const [h, setH] = React.useState(false);
+  const [i, setI] = React.useState(false);
+  const [d, setD] = React.useState<Device | null>();
+  const [abc, setABC] = React.useState<Device | null>();
+  const [db, setDb] = useGlobalState('db');
+  const [key, _] = useGlobalState('key');
+  const [_interval, setInt] = useGlobalState('interval');
+  const [_numbers, setNumbers] = useGlobalState('numbers');
+  const [_ac, setAc] = useGlobalState('auto_connect');
+  const [numbers, setN] = React.useState<string[]>([]);
+  const [nDev, setNDev] = React.useState(false);
+  
+React.useEffect(() => {
+      const d = new tresdb(getDbPath(), key);
+      setDb(d); 
+      d.read_raw<TresCol>().then(async (v) => {
 
-  const scan = async () => {
-    let c = !conn.ble;
-
-    if (!BackgroundService.isRunning()) {
-      setDc(true);
-      if (!conn.device) {
-        console.log('Scanning devices...');
-        ble.startDeviceScan(null, null, async (error, d) => {
-          console.log(`Devices: ${d}`);
-          if (d && d.name === BLE_CONF.name) {
-              ble.stopDeviceScan();
-              setError("");
-              let connectedDevice = await d.connect();
-              setConn({
-                ble: true,
-                device: connectedDevice
-              })
-              
-              await start(client);
-          } else {
-            ble.stopDeviceScan();
-            setConn({
-              ble: false,
-              device: null,
-              error: 'No device found'
-            })
+        let settings = v.settings;
+        
+          
+          setInt(settings.interval);
+          setNumbers(settings.emergency_numbers);
+          setAc(settings.auto_connect);
+          
+          settings.emergency_numbers.map(v => {
+            setN([...numbers, v.number])
+          })
+        
+          if (settings.auto_connect) {
+            await scan()
           }
-        });
-        setError("No device found");
-       
-      } else if (conn.device && !conn.ble) {
-        await start(client);
-      }
-    } else {
-      setDc(false);
-      setConn({
-        ble: false,
-        device: null,
-        error: ''
+        console.log(`Settings all done`);
       })
-      if (conn.device) await disconnectDevice();
-      await stop();
-    }
-    
-    // start(client);
-    // if (isRunning()) {
-    //   console.log('running');
-    //   await stop();
-    // } else {
-    //   console.log('dead');
-    //   await stop();
-    // }
+    }, []);
+
+  // const scanForPeripherals = () =>
+//     bleManager.startDeviceScan(null, null, (error, device) => {
+//       if (error) {
+//         console.log(error);
+//       }
+//       // console.log(`Available Devices: ${device}`)
+//       // if (device) setH([...h, device]); bleManager.stopDeviceScan();
+//       if (device && device.name?.includes("TRES")) {
+//         setAllDevices((prevState: Device[]) => {
+//           if (!isDuplicteDevice(prevState, device)) {
+//             return [...prevState, device];
+//           }
+//           return prevState;
+//         });
+//         // setAllDevices([...allDevices, device]);
+//         setNDevice(false);
+//         bleManager.stopDeviceScan();
+//       }
+//     });
+
+//     const _disconnect = async () => {
+//       if (connectedDevice) {
+//         await bleManager.cancelDeviceConnection(connectedDevice.id);
+//         bleManager.cancelTransaction('msgtransaction');
+//         setConnectedDevice(null);
+//         setBox('');
+//         setMsg('');
+//       }
+//     }
+  
+//     const disconnectFromDevice = async () => {
+//       setNDevice(false);
+//       if (BackgroundService.isRunning()) {
+//         BackgroundService.stop();
+//         await _disconnect();
+//         return;
+//       }
+//       await _disconnect();
+
+//     };
+
+  const scanForPeripherals = () => {
+    ble.startDeviceScan(null, null, (e, device) => {
+      if (e) {
+        console.log(e)
+      };
+      if (device && device.name === BLE_CONF.name) {
+        connect(device);
+        setNDev(false);
+        ble.stopDeviceScan();
+      }
+    })
   }
 
+  // const connectToDevice = async (device: Device) => {
+    //       try {
+    //         const dev = await bleManager.connectToDevice(device.id);
+    //         const deviceConnection = await dev.discoverAllServicesAndCharacteristics();
+    //         setConnectedDevice(deviceConnection);
+    //         bleManager.stopDeviceScan();
+            
+            
+    
+    //       } catch (e) {
+    //         console.log("FAILED TO CONNECT", e);
+    //       }
+    //     };
+    
+
+  const connect = async (device : Device) => {
   
-  React.useEffect(() => {
-    BackgroundService.on('expiration', async () => {
-      console.log("Disconnected");
-      
-    })
-  }, []);
-
-  React.useEffect(() => {
-    setDialog(conn.ble ? 'Connected successfully' : 'Disconnected succesfully');
-    if (!BackgroundService.isRunning()) {
+    try {
+      const dev = await ble.connectToDevice(device.id);
+      const deviceConnection = await dev.discoverAllServicesAndCharacteristics();
       setConn({
-        ble: false,
-        error: ''
-      })
+        ble: true,
+        device: dev
+      });
+      // startStreamingData(deviceConnection);
+      await start(task, minsToMs(_interval), deviceConnection, numbers);
+      ble.stopDeviceScan();
+    } catch (e) {
+      console.log("Failed to connect", e);
     }
-    console.log(`Error: ${conn.error}`)
-    // if (conn.error) setShowDialog(true)
-  }, []);
 
+  }
 
+  React.useEffect(() => {
+
+    const i = _interval ? _interval : 1800000
+    const interval = setInterval(() => {
+      if (!loc) return;
+      if (BackgroundService.isRunning()) {
+      Geolocation.getCurrentPosition(async (pos) => {
+        let c = pos.coords;
+        if (!await db?.locationInDb(loc)) await db?.insert({
+          id: uuid.v4().toString(),
+          lat: c.latitude,
+          long: c.longitude,
+          timestamp: new Date().getTime()
+        })
+        console.log(await db?.get());
+        if (loc.lat === 0) return
+        console.log(`Last: ${loc.lat}, ${loc.long};;;;;;; New: ${c.latitude}, ${c.longitude}`);
+        if (loc.lat === c.latitude || loc.long === c.longitude) return;
+        console.log(`New position ${c.latitude}, ${c.longitude}`);
+      });
+      console.log('Hello')
+    } else  {
+      return () => clearInterval(interval);
+    }
+    console.log('running')
+    }, minsToMs(i));
+    return () => clearInterval(i);
+ 
+  }, [loc])
+
+  const scan = async () => {
+
+    requestPerm().then(v => {
+      if (!v) {
+        Alert.alert("TRES Error", "Permission Denied");
+        return;
+      }
+      scanForPeripherals();
+      setTimeout(() => {
+        if (!conn.device) {
+          ble.stopDeviceScan();
+          setNDev(true);
+        }
+      }, 3000);
+
+    })
+  }
   const disconnectDevice = async () => { 
     let device = conn.device;
     if (!device) return
     const isConnected = await device.isConnected();
     if (isConnected) {
+
+        setNDev(false);
         ble.cancelTransaction('messagetransaction');
-        ble.cancelTransaction('boxtransaction');
+        // ble.cancelTransaction('boxtransaction');
         ble.cancelDeviceConnection(device.id)
             .then(() => {
                 console.log('Disconnected');
@@ -158,176 +288,121 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
                   device: null
                 })
             })
+
+        setConn({
+          device: null,
+          ble: false
+        })
+        if (BackgroundService.isRunning()) {
+          await BackgroundService.stop();
+        }
     }
+    ToastAndroid.showWithGravity(
+      "Successfully disconnected.",
+      ToastAndroid.LONG,
+      ToastAndroid.BOTTOM,
+    );
+    // BackHandler.exitApp();
     
   }
 
-  const client = async (data: any) : Promise<void> => {
+
+  const task = async (data: any) => {
     await new Promise(async (resolve) => {
-      const { delay } = data?.delay || 1000;
-
-      console.log(`Background task status: ${BackgroundService.isRunning()} with delay ${delay}`);
-      for (let i = 0; BackgroundService.isRunning(); i++) {
-        if (conn.device) {
-          // setDc(true);
-          let device = conn.device;
-          if (device && !conn.ble) {
-            setConn({
-              ble: true,
-              device: device
-            })
-          }
-          
-          device.discoverAllServicesAndCharacteristics()
-            
-            .then(device => {
-              ble.onDeviceDisconnected(device.id, (e, d) => {
-                setConn({
-                  ble: false,
-                  device: null
-                })
-              });
-
-              device.readCharacteristicForService(
-                BLE_CONF.service,
-                BLE_CONF.message
-              )
-                .then(value => {
-                  setValue({
-                    message: decode(value.value)
-                  });
-                })
-
-                device.readCharacteristicForService(
-                  BLE_CONF.service,
-                  BLE_CONF.box
-                )
-                  .then(value => {
-                    setValue({
-                      message: decode(value.value)
-                    });
-                  })
+      const delay = data?.delay || minsToMs(30);
+      const device = data?.device as Device | null;
+      const n = data?.numbers as string[] | null;
+      
   
-
-              device.monitorCharacteristicForService(
-                BLE_CONF.service,
-                BLE_CONF.message,
-                (e, char) => {
-                  setValue({
-                    message: char?.value
-                  })
-                },
-                "messsageransaction"
-              )
-    
-              device.monitorCharacteristicForService(
-                BLE_CONF.service,
-                BLE_CONF.box,
-                (e, char) => {
-                  setValue({
-                    box: char?.value
-                  })
-                },
-                "boxtransaction"
-              )
-            })
-          
-          
-          const posHandler = async (pos: GeolocationResponse) => {
-            let c = pos.coords;
-
-            setLoc({
-              lat: c.latitude,
-              long: c.longitude
-            })
-    
-            if (BackgroundService.isRunning()) {
-              // await BackgroundService.updateNotification({
-              //     // taskDesc: `Latitude: ${c.latitude}; Longitude: ${c.longitude}`
-              // });
-            }
-          }
-
-          Geolocation.getCurrentPosition(posHandler);
-
-        }
-
-       
-        
-        if (value.message?.startsWith('location') && conn.device) {
-          sendLocationData(conn.device?.id, `loc|${loc?.lat}|${loc?.long}`);
-        }
-    
-        // // await connectDevice();
-        // if (!conn.device) {
-        //   ble.startDeviceScan(null, null, (error, scannedDevice) => {
-        //     if (scannedDevice && scannedDevice.name === BLE_CONF.name) {
-        //       ble.stopDeviceScan();
-        //       connectDevice(scannedDevice);
-        //     }
-        //   });
-        //   await sleep(3000);
-        //   setConn({
-        //     ble: false,
-        //     error: 'No device found'
-        //   }) 
-        // } 
-
-        // if (conn.device) {
-        //   if (!conn.ble) setConn({
-        //     ble: true
-        //   })
-        //   let device = conn.device;
-        //   device
-        //             .readCharacteristicForService(BLE_CONF.service, BLE_CONF.message)
-        //             .then(v => {
-        //                 let val = JSON.parse(decode(v?.value));
-        //                 setValue({
-        //                   message: val,
-        //                 })
-        //             });
-
-        //         device
-        //             .readCharacteristicForService(BLE_CONF.service, BLE_CONF.box)
-        //             .then(v => {
-        //               let val = JSON.parse(decode(v?.value));
-        //               setValue({
-        //                 box: val
-        //               })
-        //             });
-                
-        //         device.monitorCharacteristicForService(
-        //             BLE_CONF.service, 
-        //             BLE_CONF.message, 
-        //             (error, char) => {
-        //                 if (!char) return
-        //                 let val = JSON.parse(decode(char?.value));
-        //                 setValue({
-        //                   message: val
-        //                 })
-                        
-        //             },
-        //             "messagetransaction"
-        //         );
-                
-        //         device.monitorCharacteristicForService(
-        //             BLE_CONF.service, 
-        //             BLE_CONF.box, 
-        //             (error, char) => {
-        //                 if (!char) return
-        //                 let val = JSON.parse(decode(char?.value));
-        //                 setValue({
-        //                   box: val
-        //                 })
-        //             },
-        //             "boxtransaction"
-        //         );
-
-        // }
-        
-        await sleep(delay)
-        
+      let last: Location = {
+        long: 0,
+        lat: 0,
       }
+
+      Geolocation.getCurrentPosition(async (pos) => {
+        setLoc({
+          lat: pos.coords.latitude,
+          long: pos.coords.longitude
+        })
+        
+        if (!await db?.locationInDb({lat: pos.coords.latitude, long: pos.coords.longitude})) {
+          console.log(`New Position : ${pos.coords.latitude} ${pos.coords.longitude}`)
+        await db?.insert({
+          id: uuid.v4().toString(),
+          lat: pos.coords.latitude,
+          long: pos.coords.longitude,
+          timestamp: new Date().getTime()
+        })
+        }
+      })
+
+    
+
+
+      device?.monitorCharacteristicForService(
+        BLE_CONF.service,
+        BLE_CONF.message,
+        (e, char) => {
+          const raw = decode(char?.value);
+          if (raw === "location") {
+            ToastAndroid.show("Sending SMS Alert...", ToastAndroid.SHORT);
+            
+            Geolocation.getCurrentPosition(async (pos) => {
+              if (!db) {
+                // Database should be initialized tho
+                ToastAndroid.show("Databse not found ... ?", ToastAndroid.LONG);
+                return;
+              }
+              let c = pos.coords;
+              let numbers = await db.readSettingsNumber();
+              console.log('Coords', c.latitude)
+              console.log("Numbers:", numbers); 
+              if (!numbers) ToastAndroid.show("No numbers set", ToastAndroid.SHORT)
+
+              numbers.map(v => {
+                
+                DirectSms.sendSms(
+                  v.number, 
+                  `TRES SOS Alert! Here's my exact location:\n\nLatitude: ${c.latitude} Longitude: ${c.longitude}`
+                );
+               
+              })
+             
+            })
+  
+            ToastAndroid.show("SMS Alert Sent...", ToastAndroid.LONG);
+            
+          }
+        }
+      )
+
+    //   for (let i = 0; BackgroundService.isRunning(); i++) {
+        
+    //     Geolocation.getCurrentPosition(pos => {
+    //       let c = pos.coords;
+    //       let lat = c.latitude;
+    //       let long = c.longitude;
+
+
+    //       if (loc.lat !== lat && loc.long !== long) {
+    //         db?.insert({
+    //           id: uuid.v4().toString(),
+    //           lat: lat,
+    //           long: long,
+    //           timestamp: new Date().getTime(),
+    //         });
+    //         console.log(`New Location ${lat} ${long}`);
+            
+    //       }
+
+    //       loc.lat = lat;
+    //       loc.long = loc.long;
+
+    //     })
+
+    //     await sleep(delay)
+    //   }
+
     });
   }
 
@@ -397,22 +472,30 @@ const ConnectScreen: React.FC<ConnectScreenProps> = props => {
 
         <View className="flex-1 pt-4">
           <Button
-            onPress={scan}
-            text={`${conn.device ? 'DISCONNECT' : (conn.error ? conn.error : 'CONNECT')}`}
+            onPress={conn.device ? disconnectDevice : scan}
+            text={`${conn.device ? 'DISCONNECT' : (nDev ? 'NO DEVICE FOUND' : 'CONNECT')}`}
             background={`${conn.device ? '#719372' : '#a78587'}`}
           />
           <View className="h-3"></View>
           <Button
-            onPress={() => props.navigation.navigate('_Auth', {
-              connect: false
-            })}
+            onPress={() => props.navigation.navigate('Main')}
             text="VIEW STATS"
           />
-          <Text className='text-[#0e0e0e]'>Dc+: {dc ? 'a' : 'b'}</Text>
-          <Text className='text-[#0e0e0e]'>Device: {conn.device?.name}</Text>
-          <Text className='text-[#0e0e0e]'>Message: {value.message}</Text>
-          <Text className='text-[#0e0e0e]'>Error: {error}</Text>
-          <View className="min-h-10 bg-[#0e0e0e]"></View>
+          
+          {/* <Button
+            onPress={BackgroundService.stop}
+            text="VIEW STATS"
+          /> */}
+         
+          {/* <Text className='text-[#0e0e0e]'>Dc+: {dc ? 'a' : 'b'}</Text> */}
+          {/* <Text className='text-[#0e0e0e]'>Dev: {d?.name} ABC: {abc?.name} I: {i ? 'true' : 'false'} H: {h ? 'true' : 'false'}</Text> */}
+          {/* <Text className='text-[#0e0e0e]'>Message: {value.message} Status: {monitor ? 'Monitoring' : 'Idle'}</Text> */}
+          {/* <Text className='text-[#0e0e0e]'>Char ID: {msgChar ? msgChar.deviceID : 'none'} Char Value: ${msgChar ? msgChar.value : 'None'} Error : {msgError ? msgError.message : 'None'}</Text> */}
+          {/* <Text className='text-[#0e0e0e]'>{}</Text> */}
+          {/* {db?.readSettingsNumber().then(v => {
+            v.map((_, i) => <Text className="text-[#0e0e0e]" key={i}>Number: {_.number}</Text>)
+          })} */}
+          {/* <View className="min-h-10 bg-[#0e0e0e]"></View> */}
         </View>
       </View>
     </SafeAreaView>

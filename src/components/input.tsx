@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Text, View } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import { Text, View, TextInput, KeyboardTypeOptions } from "react-native";
+
 
 type InputProps = {
     placeholder: string;
     password?: boolean;
     klass?: string;
     onChangeText?: (v: string) => void;
+    type?: KeyboardTypeOptions;
+    value?: string;
+    disabled?: boolean;
 }
 
 export default function Input({ 
     placeholder, 
     password = false, 
     klass = "", 
-    onChangeText = () => {} 
+    onChangeText = () => {},
+    type = "default",
+    value = "",
+    disabled = false
 }: InputProps) {
     return (
         <View className={`${klass}`}>
-            <TextInput onChangeText={onChangeText} style={{ fontFamily: 'JetBrains Mono' }} placeholderTextColor="#555"  secureTextEntry={password} placeholder={placeholder} cursorColor="#555" className={
+            <TextInput editable={!disabled} value={value ? value : undefined} keyboardType={type} onChangeText={onChangeText} style={{ fontFamily: 'JetBrains Mono' }} placeholderTextColor="#555"  secureTextEntry={password} placeholder={placeholder} cursorColor="#555" className={
                 `
                 max-w-[70vw] min-w-[70vw] 
                 rounded-xl max-h-[13vw]  

@@ -1,7 +1,7 @@
 import {View, Text, Pressable} from 'react-native';
 
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ export default function BottomBar({
     <View className="flex-1 flex-row bg-[#F1EAD8] justify-center min-w-[100vw] max-h-[9.5vh] border-t-[1.5px]">
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
-        console.log(route.name);
+
 
         const onPress = () => {
           const event = navigation.emit({
@@ -67,7 +67,7 @@ export default function BottomBar({
             icon = <Icon.Settings className={` ${isFocused ? 'text-[#0e0e0e]' : 'text-[#886d6f]'}  max-h-[18px]`} />;
             break;
         }
-        console.log(state.index);
+  
         return (
           <TabButton key={index} onPress={onPress} icon={icon} active={isFocused} />
         );

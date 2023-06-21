@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,9 +19,10 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createGlobalState } from "react-hooks-global-state";
 import { Algorithms } from "react-native-aes-crypto";
-import { Location, TransactionData } from "../interfaces/data";
+import { Location, SMSData, TransactionData, TresDoc } from "../interfaces/data";
 import { Connection, Value } from "../interfaces/state";
 import { Device } from "react-native-ble-plx";
+import { tresdb } from "./db";
 
 export const LOCATION: Location = {
     lat: 0,
@@ -30,9 +31,21 @@ export const LOCATION: Location = {
 
 
 export const { useGlobalState } = createGlobalState({
+    interval: 0,
+    db: null as tresdb | null,
+    auto_connect: false,
+    numbers: [] as Array<SMSData>,
     key: '',
     algo: 'aes-256-cbc' as Algorithms,
     iv: '',
+
+    locationHistory: [] as TresDoc[],
+    locToday: [] as TresDoc[],
+    locThisWeek: [] as TresDoc[],
+    locLastWeek: [] as TresDoc[],
+    locMoreThanWeek: [] as TresDoc[],
+    
+
     connection: {
         ble: false,
         device: null as Device | null,
@@ -47,4 +60,9 @@ export const { useGlobalState } = createGlobalState({
         lat: null,
         long: null
     } as Location | null,
+    device_id: '',
+    shared_loc: {
+        lat: 0,
+        long: 0
+    } as Location 
 });

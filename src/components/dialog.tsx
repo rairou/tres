@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,9 +16,114 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Modal, Text, View, Pressable } from 'react-native';
+import { Modal, Text, View, Pressable, ListRenderItemInfo, TouchableOpacity, FlatList } from 'react-native';
 import Button from './button';
 import React from 'react';
+import { Device } from 'react-native-ble-plx';
+
+type ConnectDialogProps = {
+    devices: Device[];
+    visible: boolean;
+    connectToPeripheral : (device: Device) => void;
+    closeModal: () => void;
+    nullDevice: boolean;
+}
+
+type ConnectDialogListItemProps = {
+    item: ListRenderItemInfo<Device>;
+    connectToPeripheral: (device: Device) => void;
+    closeModal: () => void;
+}
+
+const ConnectDialogListItem: React.FC<ConnectDialogListItemProps> = props => {
+    const { item, connectToPeripheral, closeModal } = props;
+    const connectAndCloseModal = React.useCallback(() => {
+        connectToPeripheral(item.item);
+        closeModal();
+    }, []);
+
+    return (
+        <TouchableOpacity
+            onPress={connectAndCloseModal}
+        >
+            <Text 
+                className='text-[#8f7374] font-extrabold' 
+                style={{ fontFamily: 'JetBrains Mono' }}
+            >
+                {item.item.name}
+            </Text>
+        </TouchableOpacity>
+    )
+}
+
+const ConnectDialog: React.FC<ConnectDialogProps> = props => {
+    const { devices, visible, connectToPeripheral, closeModal, nullDevice } = props;
+
+    const renderConnectDialogListItem = React.useCallback((item: ListRenderItemInfo<Device>) => {
+        return (
+            <ConnectDialogListItem
+                item={item}
+                connectToPeripheral={connectToPeripheral}
+                closeModal={closeModal}
+            />
+        )
+    }, [closeModal, connectToPeripheral]);
+
+    React.useEffect(() => {
+        if (nullDevice) closeModal();
+    }, [nullDevice])
+    
+    return (
+        <Modal
+            transparent statusBarTranslucent 
+            animationType='slide'
+            visible={visible}
+        >
+            <View className='flex-1 items-center bg-[black]/70 justify-center'>
+            <View className="flex-col min-w-[80vw] rounded-md bg-[#F1EAD8] p-5 px-5">
+                <Text 
+                    className='pb-2 font-semibold' 
+                    style={{ 
+                        color: '#a78587', 
+                        fontSize: 20,  
+                        fontFamily: 'JetBrains Mono' 
+                    }}>
+                        Available Devices
+                    </Text>
+                    {devices.map((d, i) => {
+                        return (
+                            <TouchableOpacity
+                            key={i}
+                            onPress={() => { connectToPeripheral(d); closeModal(); }}
+                        >
+                            <Text 
+                                className='text-[#8f7374] font-extrabold' 
+                                style={{ fontFamily: 'JetBrains Mono' }}
+                            >
+                                {d.name}
+                            </Text>
+                        </TouchableOpacity>
+                        )
+                    })}
+
+                    <Pressable className='pt-5' onPress={closeModal}>
+                        <View className="bg-[#a78587] max-w-[20vw] items-center">
+                            <Text className="text-[14px]" style={{ fontFamily: 'JetBrains Mono' }}>Ok</Text>
+                        </View>
+                    </Pressable>
+                    
+{/*                
+                    <FlatList
+                        data={devices}
+                        renderItem={renderConnectDialogListItem}
+                    /> */}
+                    
+            </View>
+            </View>
+        </Modal>
+    )
+
+}
 
 interface IButton {
     text: string;
@@ -70,4 +175,8 @@ export default function ErrorDialog({
 
         </Modal>
     )
+}
+
+export {
+    ConnectDialog
 }

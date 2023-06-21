@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -60,11 +60,11 @@ export default function DeviceNavigator() {
       screenListeners={({ navigation }) => ({
         state: (e) => {
           // Do something with the state
-          console.log('state changed', e.data);
+          // console.log('state changed', e.data);
 
           // Do something with the `navigation` object
           if (!navigation.canGoBack()) {
-            console.log("we're on the initial screen");
+            // console.log("we're on the initial screen");
           }
         },
       })}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@ import {AuthStackParamList} from '../interfaces/screen';
 import AuthScreen from '../screens/auth';
 import MainNavigator from './main';
 import { useRoute, RouteProp } from '@react-navigation/native';
+import ConnectScreen from '../screens/connect';
 
 const AuthStack = createStackNavigator<AuthStackParamList>();
 
@@ -30,9 +31,9 @@ export default function AuthNavigator() {
   const route: RouteProp<AuthStackParamList> = useRoute();
   return (
     <AuthStack.Navigator
-      screenOptions={{headerShown: false}}
-      initialRouteName="Auth">
-      <AuthStack.Screen initialParams={{ connect:  route.params?.connect }} name="Auth" component={AuthScreen} />
+      screenOptions={{headerShown: false}}>
+        <AuthStack.Screen name="Auth" component={AuthScreen} />
+      <AuthStack.Screen name="Connect" component={ConnectScreen} />
       <AuthStack.Screen name="Main" component={MainNavigator} />
     </AuthStack.Navigator>
   );

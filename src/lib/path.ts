@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -44,5 +44,6 @@ export function getDbFolder() {
 }
 
 export function getDbPath() {
-    return `${getDbFolder()}debug-x`;
+    console.log(getDbFolder());
+    return `${getDbFolder()}debug-g`;
 }

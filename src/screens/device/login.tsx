@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -97,11 +97,11 @@ const LoginScreen: React.FC<LoginScreenProps> = props => {
         });
       }} text='Login with Google' icon={<Google />} />
 
-  
-        <Input onChangeText={(v) => setEmail(v)} klass="pt-10" placeholder="Enter your email" />
-        <Input onChangeText={(v) => setPassword(v)} klass="pb-5" placeholder="Enter your password" password />
+        <Text className='pt-2 text-[#9b7b7d]' style={{ fontFamily: 'JetBrains Mono' }}>NOTE: Username and Password login is currently unavailable, use google instead.</Text>
+        <Input disabled type="email-address" onChangeText={(v) => setEmail(v)} klass="pt-10" placeholder="Enter your email" />
+        <Input disabled type="email-address" onChangeText={(v) => setPassword(v)} klass="pb-5" placeholder="Enter your password" password />
 
-        <Button onPress={() => {
+        <Button disabled onPress={() => {
 
           if (email && password && validateEmail(email)) {
             login()
@@ -109,10 +109,10 @@ const LoginScreen: React.FC<LoginScreenProps> = props => {
             Alert.alert("Login Error", "Please provide proper email or password");
           }
         }} text='Login' />
-
+{/* 
         <Pressable onPress={() => props.navigation.navigate("Register")}>
             <Text className="text-[#0e0e0e] pt-5 underline" style={{ fontFamily: 'JetBrains Mono' }}>Register here &rarr;</Text>
-        </Pressable>
+        </Pressable> */}
         </View>
 
     </SafeAreaView>

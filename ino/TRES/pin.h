@@ -23,7 +23,7 @@
 #define RED_PIN 25
 #define GREEN_PIN 26
 #define BLUE_PIN 27
-#define BTN_PIN 33
+#define BTN_PIN 35
 
 void setupPins();
 

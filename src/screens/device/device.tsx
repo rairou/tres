@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,16 @@
 
 
 import React from 'react';
-import {SafeAreaView, View, Text, Switch, Pressable} from 'react-native';
+import { 
+  SafeAreaView, 
+  View, 
+  Text, 
+  Switch, 
+  Pressable, 
+  TouchableOpacity,
+  Platform,
+  Linking
+} from 'react-native';
 import { FindDeviceScreenProps } from '../../interfaces/screen';
 import { useGlobalState } from '../../lib/state';
 import Button from '../../components/button';
@@ -31,6 +40,10 @@ import Geolocation from '@react-native-community/geolocation';
 import { Location } from '../../interfaces/data';
 import ErrorDialog from '../../components/dialog';
 import Loading from '../../components/loading';
+import { getId } from '../../lib/id';
+import { location_permission } from '../../lib/perm';
+import open, { openLocation } from '../../lib/maps';
+
 
 interface TresInfo {
   id: string;
@@ -42,12 +55,9 @@ const DeviceScreen: React.FC<FindDeviceScreenProps> = props => {
   const [b, setB] = React.useState(false);
   const [share, setShare] = React.useState(false);
   const navigation = useNavigation();
-  const [loc, setLoc] = useGlobalState('loc');
   const [loading, setLoading] = React.useState(false);
-  const [l, __l] = React.useState<Location>({
-    lat: 0,
-    long: 0
-  });
+  const [deviceId, setDeviceId] = useGlobalState('device_id');
+  const [sharedLoc, setSharedLoc] = useGlobalState('shared_loc');
 
   const onAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
     console.log(`${user}`);
@@ -84,7 +94,24 @@ const DeviceScreen: React.FC<FindDeviceScreenProps> = props => {
       }
       e.preventDefault();
     });
-  }, [navigation])
+  }, [navigation]);
+
+  React.useEffect(()  => {
+    if (!deviceId) {
+      getId().then(v => {
+          setDeviceId(v)
+      })
+    }
+    if (share) {
+      Geolocation.getCurrentPosition((pos) => {
+        let c = pos.coords;
+        setSharedLoc({
+          lat: c.latitude,
+          long: c.longitude
+        });
+      })
+    }
+  })
 
   
   return (
@@ -112,7 +139,10 @@ const DeviceScreen: React.FC<FindDeviceScreenProps> = props => {
             backgroundColorOff='#8b6f71'
             backgroundColorOn='#719372'
             circleColorOn='#526b53'
-            onPress={() => setShare(previousState => !previousState)}
+            onPress={() => {
+              location_permission();
+              setShare(previousState => !previousState);
+            }}
             containerStyle={{ width: 50, height: 25, borderRadius: 25, padding: 5}}
             circleStyle={{ width: 17, height: 17, borderRadius: 8 }}
           />
@@ -120,9 +150,28 @@ const DeviceScreen: React.FC<FindDeviceScreenProps> = props => {
         </View>
         
         <View style={{ backgroundColor: '' }} className='pt-20'>
-        <Text className="px-10 text-[#0e0e0e] pb-5" style={{fontFamily: 'JetBrains Mono'}}>
-          Your location | Latitude: {l.lat} Longitude: {l.long}
+          <View className='px-10'>
+        <Text className="text-[#0e0e0e] pb-5" style={{fontFamily: 'JetBrains Mono'}}>
+          Device ID: {deviceId}
+        </Text>  
+        <Text className="text-[#0e0e0e] pb-5" style={{fontFamily: 'JetBrains Mono'}}>
+          Your location | Latitude: {sharedLoc.lat ? sharedLoc.lat : 'Not Shared'} Longitude: {sharedLoc.long ? sharedLoc.long : 'Not Shared'}
         </Text>
+          <TouchableOpacity onPress={() =>  {
+            if (sharedLoc.lat && sharedLoc.long) {
+              open({
+                lat: sharedLoc.lat,
+                long: sharedLoc.long
+              })
+            }
+        
+          }}>
+            <Text style={{ fontFamily: 'JetBrains Mono' }} className='pb-5 text-[#0e0e0e]'>
+              Open Location
+              </Text>
+            </TouchableOpacity>
+        </View>
+    
         
         <View className='items-center'>
         <Input placeholder='Enter device id' />

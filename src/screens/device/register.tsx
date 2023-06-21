@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -96,9 +96,9 @@ const RegisterScreen: React.FC<RegisterScreenProps> = props => {
             }} text='Login with Google' icon={<Google />} />
 
         
-        <Input onChangeText={(e) => setEmail(e)} klass="pt-10" placeholder="Enter your email" />
-        <Input onChangeText={(e) => setPassword(e)}  placeholder="Enter your password" password />
-        <Input onChangeText={(e) => setConfirmPass(e)}  klass="pb-5" placeholder="Confirm your password" password />
+        <Input type="email-address" onChangeText={(e) => setEmail(e)} klass="pt-10" placeholder="Enter your email" />
+        <Input type="email-address" onChangeText={(e) => setPassword(e)}  placeholder="Enter your password" password />
+        <Input type="email-address" onChangeText={(e) => setConfirmPass(e)}  klass="pb-5" placeholder="Confirm your password" password />
 
         <Button onPress={() => {
             if (email && password && password === confirmPass && validateEmail(email)) {

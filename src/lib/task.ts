@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 import BackgroundService from "react-native-background-actions";
 import Geolocation from "@react-native-community/geolocation";
+import { Device } from "react-native-ble-plx";
 
 Geolocation.setRNConfiguration({
     skipPermissionRequests: false,
@@ -26,22 +27,23 @@ Geolocation.setRNConfiguration({
   });
 
 
-export const options = {
-    taskName: "TRES",
-    taskTitle: "TRES Tracker",
-    taskDesc: "Realtime track your device",
-    taskIcon: {
-      name: "ic_launcher",
-      type: "mipmap"
-    },
-    color: "#ff0ff",
-    parameters: {
-      delay: 1000 
-    }
-}
 
-export async function start(client: (taskData: any) => Promise<void>) {
-    await BackgroundService.start(client, options);
+export async function start(client: (taskData: any) => Promise<void>, delay: number, device: Device | null, n: string[]) {
+    await BackgroundService.start(client, {
+      taskName: "TRES",
+      taskTitle: "TRES Tracker",
+      taskDesc: "Track your device in realtime",
+      taskIcon: {
+        name: "ic_launcher",
+        type: "mipmap"
+      },
+      color: "#ff0ff",
+      parameters: {
+        delay: delay,
+        device: device,
+        numbers: n
+      }
+  });
 }
 
 export async function stop() {

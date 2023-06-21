@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,8 +29,7 @@ export default function RootNavigator() {
   return (
     <RootStack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="Connect">
-      <RootStack.Screen name="Connect" component={ConnectScreen} />
+      initialRouteName="_Auth">
       <RootStack.Screen name="_Auth" component={AuthNavigator} />
     </RootStack.Navigator>
   );

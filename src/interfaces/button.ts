@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 riyuzenn <riyuzenn@gmail.com>
+ * Copyright (c) 2023 rairou <rairoudes@gmail.com>
  * See the license file for more info
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@ export interface ButtonPadding {
 export type ButtonProps = {
   onPress: () => void;
   text: string;
+  small?: boolean;
   klass?: string;
   icon?: React.ReactNode;
   disabled?: boolean;
