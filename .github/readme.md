@@ -20,3 +20,17 @@ properly. PRs are open.
 * [x] User-friendly
 * [x] Realtime location sharing
 * [x] Encrypted data (using AES encryption)
+
+## Preview
+<table>
+  <tr>
+    <th>
+      <br />
+      <img src="./preview/01.jpg" height="512" />
+    </th>
+    <th>
+      <br />
+      <img src="./preview/02.jpg" height="512" />
+    </th>
+  </tr>
+</table>
